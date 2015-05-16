@@ -6,6 +6,13 @@ If the PAN contains any number of question mark (?) characters e.g.: 12345555?23
                 
 I couldn't find a tool capable of generating all possible combinations of valid card numbers (PAN) while specific digits in the PAN are known already. The tool can be used for validating a single PAN or it can generate all valid combinations for a partially known PAN. 
 
+version 0.7.0
+Initial release version. 
+
+To Do:
+Include checks for IIN and BIN
+
+
 
 
 
