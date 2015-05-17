@@ -16,6 +16,10 @@ for validating a single PAN or it can generate all valid combinations for a part
 known PAN(s). 
 
 
+Download:
+git clone https://github.com/drgfragkos/gLuhn.py.git
+
+
 Version:
 0.7.0 : 2015/05/15 - Released on GitHub. 
 0.6.0 : 2013/02/28 - Initial version not publicly released.
