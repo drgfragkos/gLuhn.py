@@ -1,5 +1,5 @@
-## You may modify, reuse and distribute the code freely as long as it is referenced back  ##
-## to the author using the following line: ..based on gLuhn.py by @drgfragkos             ##
+You may modify, reuse and distribute the code freely as long as it is referenced back
+to the author using the following line: ..based on gLuhn.py by @drgfragkos
 
 gLuhn.py v0.7 - Check/Generate PAN based on Luhn algorithm (c)gfragkos 2013  
 
