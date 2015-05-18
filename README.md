@@ -18,16 +18,32 @@ known PAN.
 
 Examples:
 For example, if you give a valid PAN, the outpu will be: 
-python gLuhn.py 1111222233334444
+$ python gLuhn.py 1111222233334444
 [+] Valid PAN  True
 
 If you give a potential PAN where one or more specific digits are not known (mark them 
 with question marks) , the output will be:
-python gLuhn.py 111122?233334444
+
+$ python gLuhn.py 111122?233334444
 Attempting to generate 10 PAN combinations for: 111122?233334444
 [+] Valid PAN  1111222233334444
 
 Total valid PAN generated: 1
+
+$ python gLuhn.py 5126877700?00?03
+Attempting to generate 100 PAN combinations for: 5126877700?00?03
+[+] Valid PAN  5126877700000903
+[+] Valid PAN  5126877700100703
+[+] Valid PAN  5126877700200503
+[+] Valid PAN  5126877700300303
+[+] Valid PAN  5126877700400103
+[+] Valid PAN  5126877700500803
+[+] Valid PAN  5126877700600603
+[+] Valid PAN  5126877700700403
+[+] Valid PAN  5126877700800203
+[+] Valid PAN  5126877700900003
+
+Total valid PAN generated: 10
 
 
 To Do:
@@ -37,7 +53,7 @@ issuers. Thus, it is not a valid PAN and it will be excluded from the list of va
 
 
 Download:
-git clone https://github.com/drgfragkos/gLuhn.py.git
+$ git clone https://github.com/drgfragkos/gLuhn.py.git
 
 
 Version:
@@ -47,9 +63,9 @@ Version:
 
 Dependencies:
 You need to have numpy installed.
-In case you need to check your Python version: python --version
-Check if you have numpy: apt-cache policy python-numpy
-Install numpy: apt-get install python-numpy
+In case you need to check your Python version: $ python --version
+Check if you have numpy: $ apt-cache policy python-numpy
+Install numpy: $ apt-get install python-numpy
 
 
 ##                                                                                        ##
