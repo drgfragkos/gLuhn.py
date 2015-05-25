@@ -10,6 +10,9 @@ import re
 
 
 def LuhnChk(card_number):
+    if (IIN_Ranges(card_number)!=True):
+	return
+	
     sum = 0
     numLength = len(card_number)
     oddeven = numLength & 1
@@ -22,6 +25,17 @@ def LuhnChk(card_number):
         sum = sum + digit
     return ( (sum % 10) == 0 )
 
+
+def IIN_Ranges(card_number):
+    IIN_tuple_ranges = ('4','51','52','53','54','55','36','37','38','6011','65','35','34','37')
+    
+    for iin in IIN_tuple_ranges:
+	if card_number[0:len(iin)] == str(iin):
+		return True
+		break
+    return False
+	
+    
 
 def GenDigits(card_number):
     if card_number.count("?") > 0 and len(card_number) <= 16:
