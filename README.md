@@ -17,7 +17,7 @@ known PAN.
 
 
 Examples:
-For example, if you give a valid PAN, the outpu will be: 
+For example, if you give a valid PAN, the output will be: 
 $ python gLuhn.py 1111222233334444
 [+] Valid PAN  True
 
