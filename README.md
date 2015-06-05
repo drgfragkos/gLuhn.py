@@ -48,7 +48,7 @@ Total valid PAN generated: 10
 
 To Do:
 Include checks for IIN and BIN. This will result in knowing that the PAN 1111222233334444 
-even even though the number validates the Luhn algorithm, it is not being used be the card
+even though the number validates the Luhn algorithm, it is a number not being used be the card
 issuers. Thus, it is not a valid PAN and it will be excluded from the list of valid answers.
 
 
