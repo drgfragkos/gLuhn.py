@@ -72,5 +72,7 @@ Install numpy: $ apt-get install python-numpy
 ##                                                                                        ##
 ############################################################################################
 
-
+CREDITS:
+For iin-user-contributions.csv
+Part of http://www.binlist.net/ Copyright 2014 binlist.net All Rights Reserved.
 
