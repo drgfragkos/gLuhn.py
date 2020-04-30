@@ -21,8 +21,8 @@ For example, if you give a valid PAN, the output will be:
 $ python gLuhn.py 1111222233334444
 [+] Valid PAN  True
 
-If you give a potential PAN where one or more specific digits are not known (mark them 
-with question marks) , the output will be:
+If you provide a potential PAN where one or more specific digits are not known (as you need
+to represent them with question marks), the output will be:
 
 $ python gLuhn.py 111122?233334444
 Attempting to generate 10 PAN combinations for: 111122?233334444
@@ -48,8 +48,9 @@ Total valid PAN generated: 10
 
 To Do:
 Include checks for IIN and BIN. This will result in knowing that the PAN 1111222233334444 
-even though the number validates the Luhn algorithm, it is a number not being used be the card
-issuers. Thus, it is not a valid PAN and it will be excluded from the list of valid answers.
+even though the number validates the Luhn algorithm, it is a number not being used by the 
+card issuers. Thus, it is not a valid PAN and it will be excluded from the list of valid 
+answers.
 
 
 Download:
@@ -62,7 +63,7 @@ Version:
 
 
 Dependencies:
-You need to have numpy installed.
+You need to have 'numpy' installed.
 In case you need to check your Python version: $ python --version
 Check if you have numpy: $ apt-cache policy python-numpy
 Install numpy: $ apt-get install python-numpy
