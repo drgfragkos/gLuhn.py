@@ -3,17 +3,26 @@
 You may modify, reuse and distribute the code freely as long as it is referenced back
 to the author using the following line: ..based on gLuhn.py by @drgfragkos
 
-gLuhn.py v0.7 - Check/Generate PAN based on Luhn algorithm (c)gfragkos 2013  
+gLuhn.py v0.7 - Check/Generate PAN based on Luhn algorithm (c)gfragkos 2013
+gLuhn.py v0.8 - Check/Generate PAN based on Luhn algorithm, validate IIN (c)gfragkos 2020
 
 usage: gLuhn.py [PAN]
-Given any Primary Account Number (PAN), the application will check if it is valid by using
-the Luhn algorithm. If the PAN contains any number of question mark (?) characters 
-e.g.: 12345555?23412?4, all valid combinations for that PAN will be generated.
+              Given any Primary Account Number (PAN), the application checks if
+              it is valid by checking against the Luhn algorithm. (No IIN check)
 
+              If the PAN contains any number of question mark (?) characters
+              e.g.: 12345555?23412?4, all valid combinations for that PAN are
+              generated, while excluding any PAN that doesn't belong to a valid
+              Issuer Identification Number (IIN)
+
+Note:
 I couldn't find a tool capable of generating all possible combinations of valid card 
 numbers (PAN) while specific digits in the PAN are known already. The tool can be used 
 to validate a single PAN or it can generate all valid combinations for a partially 
-known PAN. 
+known PAN. This tool is meant to be useful for:
+  a) data discovery
+  b) digital forensics investigations
+  c) OSINT
 
 
 Examples:
@@ -47,10 +56,7 @@ Total valid PAN generated: 10
 
 
 To Do:
-Include checks for IIN and BIN. This will result in knowing that the PAN 1111222233334444 
-even though the number validates the Luhn algorithm, it is a number not being used by the 
-card issuers. Thus, it is not a valid PAN and it will be excluded from the list of valid 
-answers.
+Include a command line option to use the IIN check for the simple PAN validation.
 
 
 Download:
@@ -58,6 +64,7 @@ $ git clone https://github.com/drgfragkos/gLuhn.py.git
 
 
 Version:
+0.8.0 : 2020/05/07 - GitHub update to include IIN checks
 0.7.0 : 2015/05/15 - Released on GitHub. 
 0.6.0 : 2013/02/28 - Initial version not publicly released.
 
