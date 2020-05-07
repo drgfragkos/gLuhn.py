@@ -3,8 +3,8 @@
 You may modify, reuse and distribute the code freely as long as it is referenced back
 to the author using the following line: ..based on gLuhn.py by @drgfragkos
 
-gLuhn.py v0.7 - Check/Generate PAN based on Luhn algorithm (c)gfragkos 2013
 gLuhn.py v0.8 - Check/Generate PAN based on Luhn algorithm, validate IIN (c)gfragkos 2020
+gLuhn.py v0.7 - Check/Generate PAN based on Luhn algorithm (c)gfragkos 2013
 
 usage: gLuhn.py [PAN]
               Given any Primary Account Number (PAN), the application checks if
@@ -26,34 +26,51 @@ known PAN. This tool is meant to be useful for:
 
 
 Examples:
-For example, if you give a valid PAN, the output will be: 
+>> PAN validation >>>>>>>>>>>>>>>>>>>>>>>>>>
+For example, if you give a valid PAN (no IIN check), the output will be: 
+
 $ python gLuhn.py 1111222233334444
 [+] Valid PAN  True
 
+>> PAN generation >>>>>>>>>>>>>>>>>>>>>>>>>>
 If you provide a potential PAN where one or more specific digits are not known (as you need
-to represent them with question marks), the output will be:
+to represent them with question marks), the output will be (has IIN check):
 
-$ python gLuhn.py 111122?233334444
-Attempting to generate 10 PAN combinations for: 111122?233334444
-[+] Valid PAN  1111222233334444
+$ python gLuhn.py 4542109540?18054
+Attempting to generate 10 PAN combinations for: 4542109540?18054
+[+] Valid PAN  4542109540018054
 
 Total valid PAN generated: 1
 
-$ python gLuhn.py 5126877700?00?03
-Attempting to generate 100 PAN combinations for: 5126877700?00?03
-[+] Valid PAN  5126877700000903
-[+] Valid PAN  5126877700100703
-[+] Valid PAN  5126877700200503
-[+] Valid PAN  5126877700300303
-[+] Valid PAN  5126877700400103
-[+] Valid PAN  5126877700500803
-[+] Valid PAN  5126877700600603
-[+] Valid PAN  5126877700700403
-[+] Valid PAN  5126877700800203
-[+] Valid PAN  5126877700900003
 
-Total valid PAN generated: 10
+$ python gLuhn.py ???2109545565554
+Attempting to generate 1000 PAN combinations for: ???2109545565554
+[+] Valid PAN  3452109545565554
+[+] Valid PAN  3502109545565554
+[+] Valid PAN  3692109545565554
+[+] Valid PAN  3742109545565554
+[+] Valid PAN  3882109545565554
+[+] Valid PAN  4062109545565554
+[+] Valid PAN  4112109545565554
+[+] Valid PAN  4252109545565554
+[+] Valid PAN  4302109545565554
+[+] Valid PAN  4492109545565554
+[+] Valid PAN  4542109545565554
+[+] Valid PAN  4682109545565554
+[+] Valid PAN  4732109545565554
+[+] Valid PAN  4872109545565554
+[+] Valid PAN  4922109545565554
+[+] Valid PAN  5192109545565554
+[+] Valid PAN  5242109545565554
+[+] Valid PAN  5382109545565554
+[+] Valid PAN  5432109545565554
+[+] Valid PAN  5572109545565554
+[+] Valid PAN  6562109545565554
 
+Total valid PAN generated: 21
+
+
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 
 To Do:
 Include a command line option to use the IIN check for the simple PAN validation.
