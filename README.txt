@@ -23,6 +23,7 @@ known PAN. This tool is meant to be useful for:
   a) data discovery
   b) digital forensics investigations
   c) OSINT
+  d) Penetration Testing assessments related to PCI DSS / PA DSS  
 
 
 Examples:
