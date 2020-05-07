@@ -73,7 +73,8 @@ Total valid PAN generated: 21
 =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 
 To Do:
-Include a command line option to use the IIN check for the simple PAN validation.
+- Include a command line option to use the IIN check for the simple PAN validation.
+- Improve the IIN check, including being able to see to which issuer the PAN belongs to.
 
 
 Download:
