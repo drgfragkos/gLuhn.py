@@ -1,7 +1,9 @@
 <#
 .SYNOPSIS
     gLuhn.ps1 v1.0 - Check / generate PAN (Luhn), identify the card scheme (IIN) and decode
-    magnetic-stripe / EMV track data.  Windows PowerShell 5.1 port of gLuhn.py.
+    magnetic-stripe / EMV track data.  PowerShell port of gLuhn.py: one script that runs
+    on Windows PowerShell 5.1 and on PowerShell 7+ (Windows, Linux, macOS) and detects
+    the engine it is running under.
     (c) gfragkos 2013-2026
 
     You may modify, reuse and distribute the code freely as long as it is referenced back
@@ -68,6 +70,7 @@
 .EXAMPLE
     .\gLuhn.ps1 ';4542109540018054=2512201123456789?'
 #>
+#Requires -Version 5.1
 [CmdletBinding()]
 param(
     [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
@@ -95,8 +98,23 @@ param(
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
 
-# Anything piped into the script (Get-Content pans.txt | .\gLuhn.ps1 -f -) is captured here.
-$script:PipelineInput = @($input | ForEach-Object { [string]$_ })
+# ---------------------------------------------------------------------------------
+# Engine detection: the script runs unchanged on Windows PowerShell 5.1 ('Desktop')
+# and on PowerShell 7+ ('Core').  The few places where the two engines differ
+# (JSON escaping, default text encodings, the version banner) consult these flags.
+# ---------------------------------------------------------------------------------
+$script:PSMajor = $PSVersionTable.PSVersion.Major
+$script:PSEditionName = 'Desktop'
+if ($PSVersionTable.ContainsKey('PSEdition') -and $PSVersionTable.PSEdition) { $script:PSEditionName = [string]$PSVersionTable.PSEdition }
+$script:IsCoreEngine = ($script:PSEditionName -eq 'Core')          # PowerShell 6/7+
+$script:IsDesktopEngine = -not $script:IsCoreEngine                  # Windows PowerShell 5.1
+$script:EngineText = "PowerShell $($PSVersionTable.PSVersion) ($($script:PSEditionName))"
+if ($script:IsDesktopEngine -and $script:PSMajor -ge 5) { $script:EngineText = "Windows $($script:EngineText)" }
+
+# Anything piped into the script (Get-Content pans.txt | .\gLuhn.ps1 -f -) is read from this
+# enumerator, but only when -File - asks for it: enumerating $input eagerly would block
+# whenever stdin is an open pipe (CI jobs, scheduled tasks) even if no input is wanted.
+$script:PipelineInput = $input
 
 $script:GLUHN_VERSION = '1.0.0'
 $script:BANNER = "gLuhn.ps1 v$($script:GLUHN_VERSION) - Check/Generate PAN (Luhn), identify IIN/scheme, decode track data (c)gfragkos 2013-2026"
@@ -431,10 +449,12 @@ function Import-BinDatabase {
         issuer   = @('issuer', 'bank', 'bank_name', 'issuer_name', 'issuing_bank')
         country  = @('country', 'country_name', 'alpha_2', 'iso_country', 'country_code', 'alpha_3')
     }
-    $firstLine = Get-Content -LiteralPath $Path -TotalCount 1
+    $firstLine = Get-Content -LiteralPath $Path -TotalCount 1 -Encoding UTF8
     $delim = ','
     foreach ($cand in @("`t", ';', '|')) { if ($firstLine.Split($cand).Count -gt $firstLine.Split($delim).Count) { $delim = $cand } }
-    $rows = @(Import-Csv -LiteralPath $Path -Delimiter $delim)
+    # -Encoding UTF8 reads BOM-less UTF-8 correctly on both engines (5.1 would otherwise
+    # fall back to the ANSI code page and garble non-ASCII bank names).
+    $rows = @(Import-Csv -LiteralPath $Path -Delimiter $delim -Encoding UTF8)
     if ($rows.Count -eq 0) { throw 'empty BIN database' }
     $header = @($rows[0].PSObject.Properties | ForEach-Object { $_.Name })
     $lower = @{}
@@ -891,15 +911,29 @@ function Write-SchemeTable {
 function Read-InputLines {
     param([string]$Path)
     if ($Path -eq '-') {
-        if ($script:PipelineInput.Count -gt 0) { return $script:PipelineInput }
+        $piped = @(foreach ($x in $script:PipelineInput) { [string]$x })
+        if ($piped.Count -gt 0) { return $piped }
         $data = [Console]::In.ReadToEnd()
         return @($data -split "`r?`n")
     }
-    return @(Get-Content -LiteralPath $Path)
+    return @(Get-Content -LiteralPath $Path -Encoding UTF8)
+}
+
+function ConvertTo-GLuhnJson {
+    # Identical JSON on both engines.  Windows PowerShell 5.1 escapes & < > ' as \uXXXX and
+    # pads with double spaces after the colon; PowerShell 7 does neither.
+    param($InputObject)
+    if ($script:IsCoreEngine) {
+        return (ConvertTo-Json -InputObject $InputObject -Depth 8 -EscapeHandling Default)
+    }
+    $json = ConvertTo-Json -InputObject $InputObject -Depth 8
+    $json = $json -replace '\\u0026', '&' -replace '\\u003c', '<' -replace '\\u003e', '>' -replace "\\u0027", "'"
+    return ($json -replace '":  ', '": ')
 }
 
 function Invoke-Main {
-    if ($Version) { Write-Output $script:BANNER; $script:ExitCode = 0; return }
+    Write-Verbose "gLuhn.ps1 $($script:GLUHN_VERSION) on $($script:EngineText)"
+    if ($Version) { Write-Output $script:BANNER; Write-Output "running on $($script:EngineText)"; $script:ExitCode = 0; return }
     if ($ListSchemes) { Write-SchemeTable; $script:ExitCode = 0; return }
 
     try {
@@ -1037,8 +1071,8 @@ function Invoke-Main {
     }
 
     if ($Json) {
-        if ($jsonOut.Count -eq 1) { Write-Output (ConvertTo-Json -InputObject $jsonOut[0] -Depth 8) }
-        else { Write-Output (ConvertTo-Json -InputObject $jsonOut.ToArray() -Depth 8) }
+        if ($jsonOut.Count -eq 1) { Write-Output (ConvertTo-GLuhnJson -InputObject $jsonOut[0]) }
+        else { Write-Output (ConvertTo-GLuhnJson -InputObject $jsonOut.ToArray()) }
     }
     if (-not $anyInput) { $script:ExitCode = 2; return }
     if ($anyValid) { $script:ExitCode = 0; return }

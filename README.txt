@@ -10,7 +10,8 @@ gLuhn.py v0.7 - Check/Generate PAN based on Luhn algorithm (c)gfragkos 2013
 Two implementations with identical behaviour and output:
 
   gLuhn.py   Python 3.6+  (standard library only; numpy is no longer needed)
-  gLuhn.ps1  Windows PowerShell 5.1 and PowerShell 7
+  gLuhn.ps1  one script for Windows PowerShell 5.1 and PowerShell 7+ (Windows, Linux, macOS);
+             it detects the engine it runs under and adapts (JSON escaping, text encodings)
 
 usage: gLuhn.py  [options] [PAN ...]
        gLuhn.ps1 [options] [PAN ...]
@@ -152,6 +153,10 @@ PS> Get-Content pans.txt | .\gLuhn.ps1 -f - -q
 PS> Get-Help .\gLuhn.ps1 -Detailed
 
 (If scripts are blocked: powershell -ExecutionPolicy Bypass -File .\gLuhn.ps1 ...)
+.\gLuhn.ps1 -Version prints which engine ran it. Note for automation: when stdin is
+redirected, the PowerShell host feeds it to the script as pipeline input and waits for
+end-of-file, so give scheduled/CI runs an explicit "< NUL" (or "< /dev/null") unless
+you really pipe PANs in with -f -.
 
 
 =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
@@ -272,7 +277,7 @@ Version:
 
 Dependencies:
 Python 3.6 or newer, standard library only.    $ python3 --version
-Windows PowerShell 5.1 (built into Windows) or PowerShell 7.
+Windows PowerShell 5.1 (built into Windows) or PowerShell 7+ (tested on 7.4).
 
 
 ##                                                                                        ##

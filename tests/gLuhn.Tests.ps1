@@ -67,7 +67,9 @@ $TestCards = [ordered]@{
     '100000000000009'  = 'UATP (Universal Air Travel Plan)'
 }
 
-Write-Output "gLuhn.ps1 tests ($($PSVersionTable.PSVersion))"
+$edition = 'Desktop'
+if ($PSVersionTable.ContainsKey('PSEdition') -and $PSVersionTable.PSEdition) { $edition = $PSVersionTable.PSEdition }
+Write-Output "gLuhn.ps1 tests on PowerShell $($PSVersionTable.PSVersion) ($edition)"
 
 Write-Output '- validation of known test numbers'
 foreach ($pan in $TestCards.Keys) {
@@ -211,11 +213,17 @@ $j = (Invoke-GLuhn @('-j', '4542109540018054', '5555555555554444')).Out | Conver
 Assert-Equal 2 @($j).Count 'JSON array for several PANs'
 Assert-Equal 'Mastercard' $j[1].scheme 'JSON second entry'
 
+$j = (Invoke-GLuhn @('-j', '4542109540018054')).Out
+Assert-NotContains $j '\u00' 'JSON is not \u-escaped on either engine'
+Assert-NotContains $j '":  ' 'JSON spacing is engine independent'
+
 $r = Invoke-GLuhn @('-ListSchemes')
 Assert-Equal 0 $r.Code 'list schemes exit code'
 Assert-Contains $r.Out 'Mastercard (mastercard)' 'scheme table'
 $r = Invoke-GLuhn @('-Version')
 Assert-Contains $r.Out 'gLuhn.ps1 v' 'version banner'
+Assert-Contains $r.Out "running on" 'version banner names the engine'
+Assert-Contains $r.Out "$($PSVersionTable.PSVersion)" 'version banner shows the engine version'
 
 Write-Output ''
 Write-Output "Passed: $script:Pass   Failed: $script:Fail"
