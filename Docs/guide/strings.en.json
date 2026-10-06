@@ -1,0 +1,63 @@
+{
+  "lang": "en",
+  "dir": "ltr",
+  "subtitle": "User guide",
+  "groups": [
+    { "name": "Learn",   "sections": [1, 2, 3] },
+    { "name": "Apply",   "sections": [4, 5, 6] },
+    { "name": "Support", "sections": [7, 8, 9] }
+  ],
+  "skipSections": ["Contents"],
+  "navSubsections": [5],
+  "countSubsections": [5],
+  "callouts": {
+    "note": "Note",
+    "attention": "Attention",
+    "info": "Attribution"
+  },
+  "codeLabels": {
+    "powershell": "PowerShell",
+    "bash": "Bash",
+    "python": "Python",
+    "text": "Text",
+    "json": "JSON",
+    "csv": "CSV",
+    "cmd": "Command Prompt",
+    "console": "Console"
+  },
+  "flowBadges": {
+    "start": "Start",
+    "step": "Step",
+    "see": "See",
+    "decide": "Decide",
+    "end": "End"
+  },
+  "onThisPage": "On this page",
+  "searchPlaceholder": "Search the FAQ",
+  "matchAll": "Match all words",
+  "searchAnswers": "Search answers too",
+  "wholeWords": "Whole words only",
+  "expandAll": "Expand all",
+  "collapseAll": "Collapse all",
+  "all": "All",
+  "noMatches": "No entries match.",
+  "resultCounter": "{shown} of {total}",
+  "copy": "Copy",
+  "copied": "Copied",
+  "showMore": "Show {n} more lines",
+  "showFewer": "Show fewer lines",
+  "backToTop": "Back to top",
+  "keyboardHint": "Press / to search the FAQ",
+  "categories": {
+    "general": "General",
+    "usage": "Usage",
+    "output": "Output",
+    "errors": "Errors",
+    "security": "Security"
+  },
+  "emblem": "<svg viewBox=\"0 0 210 36\" width=\"210\" height=\"36\" role=\"img\" aria-label=\"Markdown in, one HTML file out\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"><rect x=\"3\" y=\"6\" width=\"48\" height=\"24\" rx=\"4\"/><path d=\"M10 13h26M10 18h34M10 23h20\"/><path d=\"M58 18h32\"/><path d=\"M85 13l6 5-6 5\"/><rect x=\"98\" y=\"3\" width=\"40\" height=\"30\" rx=\"4\"/><path d=\"M105 11h10M105 17h26M105 23h22\"/><path d=\"M145 18h32\"/><path d=\"M172 13l6 5-6 5\"/><rect x=\"185\" y=\"6\" width=\"22\" height=\"24\" rx=\"4\"/><path d=\"M190 15l4 4 7-8\"/></g></svg>",
+  "autolink": {
+    "pattern": "\\bUC(\\d+)\\b",
+    "target": "5.{1}"
+  }
+}

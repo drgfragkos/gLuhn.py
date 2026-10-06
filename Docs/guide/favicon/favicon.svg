@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Rounded card tile with a check mark. Teal #0E6B6B on white. -->
+  <rect x="4" y="4" width="56" height="56" rx="12" ry="12" fill="#FFFFFF" stroke="#0E6B6B" stroke-width="5"/>
+  <path d="M19 33 L28 42 L46 23" fill="none" stroke="#0E6B6B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

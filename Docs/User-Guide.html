@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Build-UserGuide.ps1">
+<title>gLuhn</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij4KICA8IS0tIFJvdW5kZWQgY2FyZCB0aWxlIHdpdGggYSBjaGVjayBtYXJrLiBUZWFsICMwRTZCNkIgb24gd2hpdGUuIC0tPgogIDxyZWN0IHg9IjQiIHk9IjQiIHdpZHRoPSI1NiIgaGVpZ2h0PSI1NiIgcng9IjEyIiByeT0iMTIiIGZpbGw9IiNGRkZGRkYiIHN0cm9rZT0iIzBFNkI2QiIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPHBhdGggZD0iTTE5IDMzIEwyOCA0MiBMNDYgMjMiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBFNkI2QiIgc3Ryb2tlLXdpZHRoPSI3IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==">
+<link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="data:image/x-icon;base64,AAABAAMAEBAAAAEAIABoBAAANgAAACAgAAABACAAqBAAAJ4EAAAwMAAAAQAgAKglAABGFQAAKAAAABAAAAAgAAAAAQAgAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa2sOQGtrDoBraw6/a2sOv2trDr9raw6/a2sOv2trDr9raw6/a2sOv2trDoBraw5AAAAAAAAAAAAAAAAAa2sOn2trDv+QkEr/kJBK/5CQSv+QkEr/kJBK/5CQSv+QkEr/kJBK/5CQSv+QkEr/a2sO/2trDp8AAAAAa2sOQGtrDv/j49L//////////////////////////////////////////////////////+Pj0v9raw7/a2sOQGtrDoCQkEr/////////////////////////////////////////////////////////////////kJBK/2trDoBraw6/kJBK///////////////////////s7OH/7Ozh/////////////////////////////////5CQSv9raw6/a2sOv5CQSv/////////////////j49L/dHQd/3R0Hf/j49L///////////////////////////+QkEr/a2sOv2trDr+QkEr////////////j49L/dHQd/3R0Hf9raw7/dHQd/+Pj0v//////////////////////kJBK/2trDr9raw6/kJBK////////////dHQd/3R0Hf/j49L/yMil/2trDv90dB3/4+PS/////////////////5CQSv9raw6/a2sOv5CQSv///////////76+lv/j49L////////////IyKX/a2sO/3R0Hf/j49L///////////+QkEr/a2sOv2trDr+QkEr//////////////////////////////////////8jIpf9raw7/dHQd//b28P//////kJBK/2trDr9raw6/kJBK////////////////////////////////////////////yMil/2trDv/j49L//////5CQSv9raw6/a2sOv5CQSv////////////////////////////////////////////////////////////////+QkEr/a2sOv2trDoCQkEr/////////////////////////////////////////////////////////////////kJBK/2trDoBraw5Aa2sO/+Pj0v//////////////////////////////////////////////////////4+PS/2trDv9raw5AAAAAAGtrDp9raw7/kJBK/5CQSv+QkEr/kJBK/5CQSv+QkEr/kJBK/5CQSv+QkEr/kJBK/2trDv9raw6fAAAAAAAAAAAAAAAAa2sOQGtrDoBraw6/a2sOv2trDr9raw6/a2sOv2trDr9raw6/a2sOv2trDoBraw5AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAACAAAABAAAAAAQAgAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGtrDhBraw5Aa2sOQGtrDkBraw5Aa2sOQGtrDkBraw5Aa2sOQGtrDkBraw5Aa2sOQGtrDkBraw5Aa2sOQGtrDkBraw5Aa2sOQGtrDkBraw4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGtrDmBraw7Pa2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7Pa2sOYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGtrDhBraw6fa2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sOn2trDhAAAAAAAAAAAAAAAAAAAAAAa2sOn2trDv9raw7/dHQd/6ysd//a2sP/2trD/9raw//a2sP/2trD/9raw//a2sP/2trD/9raw//a2sP/2trD/9raw//a2sP/2trD/9raw//a2sP/2trD/9raw/+srHf/dHQd/2trDv9raw7/a2sOnwAAAAAAAAAAAAAAAGtrDmBraw7/a2sO/4eHO//29vD////////////////////////////////////////////////////////////////////////////////////////////////////////////29vD/h4c7/2trDv9raw7/a2sOYAAAAAAAAAAAa2sOz2trDv90dB3/9vbw///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////29vD/dHQd/2trDv9raw7PAAAAAGtrDhBraw7/a2sO/6ysd/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////+srHf/a2sO/2trDv9raw4Qa2sOQGtrDv9raw7/2trD/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9raw/9raw7/a2sO/2trDkBraw5Aa2sO/2trDv/a2sP/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////2trD/2trDv9raw7/a2sOQGtrDkBraw7/a2sO/9raw/////////////////////////////////////////////b28P+ZmVn/mZlZ//b28P/////////////////////////////////////////////////////////////////a2sP/a2sO/2trDv9raw5Aa2sOQGtrDv9raw7/2trD///////////////////////////////////////29vD/h4c7/2trDv9raw7/h4c7//b28P///////////////////////////////////////////////////////////9raw/9raw7/a2sO/2trDkBraw5Aa2sO/2trDv/a2sP/////////////////////////////////9vbw/4eHO/9raw7/a2sO/2trDv9raw7/h4c7//b28P//////////////////////////////////////////////////////2trD/2trDv9raw7/a2sOQGtrDkBraw7/a2sO/9raw/////////////////////////////b28P+Hhzv/a2sO/2trDv9raw7/a2sO/2trDv9raw7/h4c7//b28P/////////////////////////////////////////////////a2sP/a2sO/2trDv9raw5Aa2sOQGtrDv9raw7/2trD///////////////////////29vD/h4c7/2trDv9raw7/a2sO/4eHO/90dB3/a2sO/2trDv9raw7/h4c7//b28P///////////////////////////////////////////9raw/9raw7/a2sO/2trDkBraw5Aa2sO/2trDv/a2sP/////////////////9vbw/4eHO/9raw7/a2sO/2trDv+Hhzv/9vbw/+Pj0v90dB3/a2sO/2trDv9raw7/oqJo////////////////////////////////////////////2trD/2trDv9raw7/a2sOQGtrDkBraw7/a2sO/9raw//////////////////a2sP/a2sO/2trDv9raw7/h4c7//b28P///////////+Pj0v90dB3/a2sO/2trDv9raw7/oqJo///////////////////////////////////////a2sP/a2sO/2trDv9raw5Aa2sOQGtrDv9raw7/2trD//////////////////b28P+Hhzv/a2sO/4eHO//29vD//////////////////////+Pj0v90dB3/a2sO/2trDv9raw7/oqJo/////////////////////////////////9raw/9raw7/a2sO/2trDkBraw5Aa2sO/2trDv/a2sP///////////////////////b28P/a2sP/9vbw/////////////////////////////////9raw/9raw7/a2sO/2trDv9raw7/oqJo////////////////////////////2trD/2trDv9raw7/a2sOQGtrDkBraw7/a2sO/9raw////////////////////////////////////////////////////////////////////////////8jIpf9raw7/a2sO/2trDv9raw7/rKx3///////////////////////a2sP/a2sO/2trDv9raw5Aa2sOQGtrDv9raw7/2trD/////////////////////////////////////////////////////////////////////////////////8jIpf9raw7/a2sO/2trDv9raw7/yMil/////////////////9raw/9raw7/a2sO/2trDkBraw5Aa2sO/2trDv/a2sP//////////////////////////////////////////////////////////////////////////////////////8jIpf9raw7/a2sO/2trDv+QkEr/////////////////2trD/2trDv9raw7/a2sOQGtrDkBraw7/a2sO/9raw////////////////////////////////////////////////////////////////////////////////////////////8jIpf9raw7/a2sO/8jIpf/////////////////a2sP/a2sO/2trDv9raw5Aa2sOQGtrDv9raw7/2trD/////////////////////////////////////////////////////////////////////////////////////////////////+Pj0v/j49L//////////////////////9raw/9raw7/a2sO/2trDkBraw5Aa2sO/2trDv/a2sP/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////2trD/2trDv9raw7/a2sOQGtrDkBraw7/a2sO/9raw//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////a2sP/a2sO/2trDv9raw5Aa2sOEGtrDv9raw7/rKx3/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////6ysd/9raw7/a2sO/2trDhAAAAAAa2sOz2trDv90dB3/9vbw///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////29vD/dHQd/2trDv9raw7PAAAAAAAAAABraw5ga2sO/2trDv+Hhzv/9vbw////////////////////////////////////////////////////////////////////////////////////////////////////////////9vbw/4eHO/9raw7/a2sO/2trDmAAAAAAAAAAAAAAAABraw6fa2sO/2trDv90dB3/rKx3/9raw//a2sP/2trD/9raw//a2sP/2trD/9raw//a2sP/2trD/9raw//a2sP/2trD/9raw//a2sP/2trD/9raw//a2sP/2trD/6ysd/90dB3/a2sO/2trDv9raw6fAAAAAAAAAAAAAAAAAAAAAGtrDhBraw6fa2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sOn2trDhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABraw5ga2sOz2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sOz2trDmAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa2sOEGtrDkBraw5Aa2sOQGtrDkBraw5Aa2sOQGtrDkBraw5Aa2sOQGtrDkBraw5Aa2sOQGtrDkBraw5Aa2sOQGtrDkBraw5Aa2sOQGtrDhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAwAAAAYAAAAAEAIAAAAAAAACQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGtrDlBraw6Pa2sOv2trDr9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw6/a2sOv2trDo9raw5QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABraw5ga2sO32trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO32trDmAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa2sOEGtrDq9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw6va2sOEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABraw4Qa2sOz2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sOz2trDhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABraw6va2sO/2trDv9raw7/a2sO/5CQSv/IyKX/9vbw////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9vbw/8jIpf+QkEr/a2sO/2trDv9raw7/a2sO/2trDq8AAAAAAAAAAAAAAAAAAAAAAAAAAGtrDmBraw7/a2sO/2trDv9raw7/tbWG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////tbWG/2trDv9raw7/a2sO/2trDv9raw5gAAAAAAAAAAAAAAAAAAAAAGtrDt9raw7/a2sO/2trDv+1tYb//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7W1hv9raw7/a2sO/2trDv9raw7fAAAAAAAAAAAAAAAAa2sOUGtrDv9raw7/a2sO/5CQSv////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////+QkEr/a2sO/2trDv9raw7/a2sOUAAAAAAAAAAAa2sOj2trDv9raw7/a2sO/8jIpf/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////IyKX/a2sO/2trDv9raw7/a2sOjwAAAAAAAAAAa2sOv2trDv9raw7/a2sO//b28P/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////29vD/a2sO/2trDv9raw7/a2sOvwAAAAAAAAAAa2sOv2trDv9raw7/a2sO////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sOvwAAAAAAAAAAa2sO/2trDv9raw7/a2sO////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO////////////////////////////////////////////////////////////////////////////rKx3/2trDv9raw7/rKx3////////////////////////////////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO//////////////////////////////////////////////////////////////////////+iomj/a2sO/2trDv9raw7/a2sO/6KiaP//////////////////////////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO/////////////////////////////////////////////////////////////////6KiaP9raw7/a2sO/2trDv9raw7/a2sO/2trDv+iomj/////////////////////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO////////////////////////////////////////////////////////////oqJo/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/oqJo////////////////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO//////////////////////////////////////////////////////+iomj/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/6ysd///////////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO/////////////////////////////////////////////////6KiaP9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv/IyKX/////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO////////////////////////////////////////////oqJo/2trDv9raw7/a2sO/2trDv9raw7/a2sO/6KiaP+Hhzv/a2sO/2trDv9raw7/a2sO/2trDv9raw7/yMil////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO//////////////////////////////////////+iomj/a2sO/2trDv9raw7/a2sO/2trDv9raw7/oqJo///////29vD/h4c7/2trDv9raw7/a2sO/2trDv9raw7/a2sO/8jIpf//////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO/////////////////////////////////+Pj0v9raw7/a2sO/2trDv9raw7/a2sO/2trDv+iomj/////////////////9vbw/4eHO/9raw7/a2sO/2trDv9raw7/a2sO/2trDv/IyKX/////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO/////////////////////////////////9raw/9raw7/a2sO/2trDv9raw7/a2sO/6KiaP////////////////////////////b28P9+fiz/a2sO/2trDv9raw7/a2sO/2trDv9raw7/2trD////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO//////////////////////////////////b28P90dB3/a2sO/2trDv9raw7/oqJo///////////////////////////////////////j49L/dHQd/2trDv9raw7/a2sO/2trDv9raw7/dHQd/+Pj0v//////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO///////////////////////////////////////j49L/mZlZ/5CQSv+1tYb/////////////////////////////////////////////////4+PS/3R0Hf9raw7/a2sO/2trDv9raw7/a2sO/3R0Hf/j49L/////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO/////////////////////////////////////////////////////////////////////////////////////////////////////////////////+Pj0v90dB3/a2sO/2trDv9raw7/a2sO/2trDv90dB3/4+PS////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////j49L/dHQd/2trDv9raw7/a2sO/2trDv9raw7/dHQd/+Pj0v//////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////2trD/2trDv9raw7/a2sO/2trDv9raw7/a2sO/35+LP/29vD/////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8jIpf9raw7/a2sO/2trDv9raw7/a2sO/2trDv+QkEr/////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////IyKX/a2sO/2trDv9raw7/a2sO/2trDv9raw7/////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////yMil/2trDv9raw7/a2sO/2trDv90dB3/////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8jIpf9raw7/a2sO/2trDv/IyKX/////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////s7OH/2trD/+zs4f//////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sO/2trDv9raw7/a2sO////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sO/wAAAAAAAAAAa2sOv2trDv9raw7/a2sO////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////a2sO/2trDv9raw7/a2sOvwAAAAAAAAAAa2sOv2trDv9raw7/a2sO//b28P/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////29vD/a2sO/2trDv9raw7/a2sOvwAAAAAAAAAAa2sOj2trDv9raw7/a2sO/8jIpf/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////IyKX/a2sO/2trDv9raw7/a2sOjwAAAAAAAAAAa2sOUGtrDv9raw7/a2sO/5CQSv////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////+QkEr/a2sO/2trDv9raw7/a2sOUAAAAAAAAAAAAAAAAGtrDt9raw7/a2sO/2trDv+1tYb//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7W1hv9raw7/a2sO/2trDv9raw7fAAAAAAAAAAAAAAAAAAAAAGtrDmBraw7/a2sO/2trDv9raw7/tbWG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////tbWG/2trDv9raw7/a2sO/2trDv9raw5gAAAAAAAAAAAAAAAAAAAAAAAAAABraw6va2sO/2trDv9raw7/a2sO/5CQSv/IyKX/9vbw////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9vbw/8jIpf+QkEr/a2sO/2trDv9raw7/a2sO/2trDq8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABraw4Qa2sOz2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sOz2trDhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa2sOEGtrDq9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw6va2sOEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABraw5ga2sO32trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO32trDmAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGtrDlBraw6Pa2sOv2trDr9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw7/a2sO/2trDv9raw6/a2sOv2trDo9raw5QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=">
+<style>
+:root{
+  --paper:#F6F7F5;--panel:#FFFFFF;--text:#1F2933;--muted:#5B6B7A;--rule:#DCE1E6;
+  --accent:#0E6B6B;--accent-soft:#E3F1F0;--warn:#A8600E;--warn-soft:#FBF0DF;
+  --info:#2B5FA6;--info-soft:#E7EEF8;
+  --ink:#1C2733;--ink-2:#2F3D4C;--code-text:#E6ECF2;--rail-text:#D5DEE7;--rail-muted:#8E9DAC;--rail-faint:#5F7080;
+  --font-text:"IBM Plex Sans","Segoe UI",Inter,system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono","Cascadia Mono",Consolas,monospace;
+  --text-size:15px;--text-lh:1.55;--code-size:13px;--code-lh:1.5;
+  --rail-w:250px;--onpage-w:220px;--col-gap:56px;--collapse-lines:14;
+  --radius:10px;--shadow:0 8px 22px rgba(28,39,51,.22);
+}
+*{box-sizing:border-box}
+html{background:var(--paper);scroll-padding-top:16px}
+body{margin:0;background:var(--paper);color:var(--text);font-family:var(--font-text);font-size:var(--text-size);line-height:var(--text-lh);text-align:start;-webkit-text-size-adjust:100%;min-height:100vh}
+[hidden]{display:none !important}
+a{color:var(--accent)}
+a:hover{text-decoration-thickness:2px}
+code,kbd,pre{font-family:var(--font-mono);font-size:var(--code-size)}
+p code,li code,td code,th code,dd code,dt code,.callout code,.flow-text code,.card-for code,.faq-q code{background:var(--accent-soft);color:#0B4F4F;padding:1px 5px;border-radius:4px;font-size:.9em}
+kbd{display:inline-block;border:1px solid rgba(255,255,255,.25);border-radius:4px;padding:0 5px;font-size:11px;line-height:1.5;background:rgba(255,255,255,.08);color:inherit}
+mark{background:#FFE68F;color:inherit;padding:0 1px;border-radius:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Rail */
+.rail{position:fixed;inset-block:0;inset-inline-start:0;width:var(--rail-w);background:var(--ink);color:var(--rail-text);display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;font-size:13.5px;z-index:4}
+.rail-head{padding:22px 20px 12px}
+.rail-title{font-size:19px;font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.2}
+.rail-subtitle{font-size:12.5px;color:var(--rail-muted);margin-top:3px}
+.rail-emblem{padding:6px 20px 12px;color:#9FB0C0}
+.rail-emblem svg{display:block;max-width:100%;height:auto}
+.rail-group{padding:6px 12px 4px}
+.rail-group-name{font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#7E8E9E;padding:10px 8px 6px}
+.rail-link{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;color:var(--rail-text);text-decoration:none;line-height:1.3}
+.rail-link:hover{background:rgba(255,255,255,.06);color:#fff}
+.rail-link.is-active{background:var(--accent);color:#fff}
+.rail-num{font-family:var(--font-mono);font-size:11.5px;font-weight:600;color:var(--rail-muted);min-width:20px;text-align:start}
+.rail-link.is-active .rail-num{color:rgba(255,255,255,.78)}
+.rail-text{flex:1;min-width:0}
+.rail-badge{font-family:var(--font-mono);font-size:11px;font-weight:600;line-height:1;background:rgba(255,255,255,.1);color:#C5D0DA;padding:4px 7px;border-radius:999px}
+.rail-link.is-active .rail-badge{background:rgba(255,255,255,.22);color:#fff}
+.rail-sub{display:flex;flex-direction:column;margin:2px 0 6px;padding-inline-start:22px}
+.rail-sub a{position:relative;display:flex;align-items:baseline;gap:8px;padding:4px 10px;border-radius:6px;color:#A8B6C4;font-size:12.5px;line-height:1.35;text-decoration:none}
+.rail-sub a:hover{color:#fff;background:rgba(255,255,255,.05)}
+.rail-sub a::before{content:"";position:absolute;inset-inline-start:-1px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:transparent}
+.rail-sub a.is-current{color:#fff}
+.rail-sub a.is-current::before{background:#8FD3CF}
+.rail-sub-num{font-family:var(--font-mono);font-size:11px;color:#7E8E9E;min-width:28px;flex:0 0 auto}
+.rail-foot{margin-top:auto;padding:14px 20px 18px;border-top:1px solid rgba(255,255,255,.08)}
+.rail-hint{font-size:12px;color:var(--rail-muted)}
+.rail-copy{margin-top:10px;font-size:11px;line-height:1.5;color:var(--rail-faint)}
+
+/* Layout: start-aligned group of reading column + on-this-page column */
+.page{display:flex;justify-content:flex-start;align-items:flex-start;gap:var(--col-gap);margin-inline-start:var(--rail-w);padding-block:36px 96px;padding-inline:48px 32px}
+.reading{flex:0 1 calc(88ch * 1.15);min-width:0}
+.reading p,.reading ul,.reading ol,.reading h3,.reading h4,.callout,.faq-body{max-width:88ch}
+.table-wrap,.code,.flow,.cards,.faq-tools,details.faq{max-width:none}
+
+/* Section title with number tile */
+.section-title{display:flex;align-items:center;gap:14px;margin:0 0 22px;font-size:30px;line-height:1.2;font-weight:700;letter-spacing:-.015em}
+.num-tile{display:inline-flex;align-items:center;justify-content:center;min-width:46px;height:40px;padding:0 10px;border:1px solid var(--rule);border-radius:9px;background:var(--panel);font-family:var(--font-mono);font-size:15px;font-weight:600;color:var(--muted);letter-spacing:.02em;flex:0 0 auto}
+.reading h3{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;font-size:20px;line-height:1.3;font-weight:700;letter-spacing:-.01em;margin:36px 0 10px;padding-top:14px;border-top:1px solid var(--rule);scroll-margin-top:16px}
+.reading h3:first-of-type{border-top:0;padding-top:0}
+.h-num{color:var(--muted);font-weight:500;font-size:.85em;font-family:var(--font-mono)}
+.reading h4{font-size:16px;font-weight:600;margin:22px 0 6px;scroll-margin-top:16px}
+.reading p{margin:0 0 12px}
+.reading ul,.reading ol{margin:0 0 12px;padding-inline-start:1.6em}
+.reading li{margin:3px 0}
+.reading li>ul,.reading li>ol{margin:4px 0 0}
+.xref{font-family:var(--font-mono);font-size:.92em;text-decoration:none;border-bottom:1px dotted var(--accent)}
+
+/* Callouts */
+.callout{display:flex;flex-direction:column;gap:4px;margin:16px 0;padding:12px 16px;border:1px solid var(--rule);border-inline-start:4px solid var(--accent);border-radius:8px;background:var(--panel)}
+.callout-label{font-weight:700;font-size:13px;letter-spacing:.02em}
+.callout-text p{margin:0 0 6px}
+.callout-text p:last-child{margin-bottom:0}
+.callout-note{background:var(--accent-soft);border-inline-start-color:var(--accent)}
+.callout-note .callout-label{color:var(--accent)}
+.callout-attention{background:var(--warn-soft);border-inline-start-color:var(--warn)}
+.callout-attention .callout-label{color:var(--warn)}
+.callout-info{background:var(--info-soft);border-inline-start-color:var(--info)}
+.callout-info .callout-label{color:var(--info)}
+
+/* Tables */
+.table-wrap{overflow-x:auto;margin:16px 0;border:1px solid var(--rule);border-radius:8px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{background:var(--paper);color:var(--muted);font-weight:600;text-align:start;padding:9px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+tr:last-child td{border-bottom:0}
+
+/* Code blocks */
+.code{position:relative;margin:16px 0;border-radius:var(--radius);background:var(--ink-2);color:var(--code-text);overflow:hidden;direction:ltr;text-align:left}
+.code-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 8px 6px 14px;background:var(--ink);color:#B8C4D0;font-size:12px;letter-spacing:.02em}
+.copy-btn{border:1px solid rgba(255,255,255,.18);background:transparent;color:#D5DEE7;border-radius:6px;padding:3px 10px;font-family:var(--font-text);font-size:12px;cursor:pointer}
+.copy-btn:hover{background:rgba(255,255,255,.08)}
+.copy-btn.is-done{border-color:#8FD3CF;color:#8FD3CF}
+.code pre{margin:0;padding:12px 14px;overflow:auto;line-height:var(--code-lh);tab-size:4}
+.code pre code{font-size:var(--code-size);color:inherit;background:none;padding:0}
+.code.collapsed pre{max-height:calc(var(--collapse-lines) * var(--code-lh) * var(--code-size) + 24px);overflow:hidden}
+.code.collapsed pre::after{content:"";position:absolute;left:0;right:0;bottom:30px;height:36px;background:linear-gradient(rgba(47,61,76,0),var(--ink-2));pointer-events:none}
+.code-more{display:block;width:100%;border:0;border-top:1px solid rgba(255,255,255,.08);background:var(--ink);color:#B8C4D0;padding:7px 14px;font-family:var(--font-text);font-size:12px;text-align:left;cursor:pointer}
+.code-more:hover{color:#fff}
+
+/* Decision flow */
+.flow{display:flex;flex-direction:column;margin:18px 0}
+.flow-node{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid var(--rule);border-radius:var(--radius);background:var(--panel)}
+.flow-badge{flex:0 0 auto;min-width:56px;text-align:center;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:600;line-height:1;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.flow-start .flow-badge,.flow-end .flow-badge{background:var(--accent);color:#fff}
+.flow-step .flow-badge{background:var(--ink-2);color:#fff}
+.flow-see .flow-badge{background:#E4E8EC;color:var(--muted)}
+.flow-decide .flow-badge{background:var(--warn);color:#fff}
+.flow-decide{border-color:#E8C89A;background:var(--warn-soft)}
+.flow-body{flex:1;min-width:0}
+.flow-cmd{display:block;margin-top:8px;padding:6px 10px;border-radius:6px;background:var(--ink-2);color:var(--code-text);font-size:12.5px;white-space:pre-wrap;direction:ltr;text-align:left}
+.flow-arrow{align-self:center;color:var(--muted);display:flex;height:22px;margin:2px 0}
+.flow-branches{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:10px 0 0;font-size:14px}
+.flow-branch{display:contents}
+.flow-branches dt{font-weight:600;color:var(--warn)}
+.flow-branches dd{margin:0}
+
+/* Cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:18px 0}
+.card{display:flex;flex-direction:column;padding:14px 16px;border:1px solid var(--rule);border-radius:var(--radius);background:var(--panel);color:inherit;text-decoration:none;transition:border-color .15s,box-shadow .15s}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(14,107,107,.12)}
+.card-name{color:var(--accent);font-weight:700;font-size:16px}
+.card-folder{font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-top:2px;text-align:start}
+.card-for{margin:8px 0 0;font-size:14px;flex:1}
+.card-meta{font-size:12.5px;color:var(--muted);margin-top:6px}
+.card-meta-key{font-weight:600}
+.card-needs{margin-top:12px;padding-top:8px;border-top:1px dashed var(--rule);font-size:12.5px;color:var(--muted)}
+
+/* FAQ */
+.faq-tools{margin:16px 0 20px;padding:14px 16px;border:1px solid var(--rule);border-radius:var(--radius);background:var(--panel)}
+.faq-search-row{display:flex;align-items:center;gap:10px;padding:6px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--muted)}
+.faq-search-row:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#faq-search{flex:1;min-width:0;border:0;background:transparent;color:var(--text);font-family:var(--font-text);font-size:15px;padding:4px 0;outline:none}
+#faq-search::-webkit-search-cancel-button{cursor:pointer}
+.faq-count{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.faq-options{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:12px;font-size:13.5px;color:var(--muted)}
+.faq-options label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.faq-options input{accent-color:var(--accent);margin:0}
+.faq-expand{margin-inline-start:auto;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:6px;padding:4px 11px;font-family:var(--font-text);font-size:12.5px;font-weight:600;cursor:pointer}
+.faq-expand:hover{background:var(--accent-soft)}
+.faq-expand:disabled{opacity:.5;cursor:default}
+.faq-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--rule)}
+.faq-chip{border:1px solid var(--rule);background:var(--paper);color:var(--text);border-radius:999px;padding:4px 12px;font-family:var(--font-text);font-size:12.5px;cursor:pointer}
+.faq-chip:hover{border-color:var(--accent);color:var(--accent)}
+.faq-chip.is-active{background:var(--accent);border-color:var(--accent);color:#fff}
+.faq-none{color:var(--muted);font-style:italic}
+details.faq{margin:8px 0;border:1px solid var(--rule);border-radius:8px;background:var(--panel)}
+details.faq summary{display:flex;align-items:baseline;gap:10px;padding:10px 14px;cursor:pointer;font-weight:600;list-style:none;line-height:1.4}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::before{content:"";flex:0 0 auto;width:0;height:0;border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent var(--muted);transform:translateY(-1px);transition:transform .15s}
+[dir="rtl"] details.faq summary::before{border-width:4px 6px 4px 0;border-color:transparent var(--muted) transparent transparent}
+details.faq[open] summary::before{transform:rotate(90deg) translateX(1px)}
+[dir="rtl"] details.faq[open] summary::before{transform:rotate(-90deg) translateX(-1px)}
+.faq-q{flex:1;min-width:0}
+.faq-cat{margin-inline-start:auto;flex:0 0 auto;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--paper);border:1px solid var(--rule);border-radius:999px;padding:2px 8px;line-height:1.5}
+.faq-body{padding-block:10px 12px;padding-inline:30px 14px;border-top:1px solid var(--rule)}
+.faq-body p:last-child{margin-bottom:0}
+
+/* On this page */
+.onpage{flex:0 0 var(--onpage-w);width:var(--onpage-w);position:sticky;top:28px;align-self:flex-start;max-height:calc(100vh - 56px);overflow:auto;padding-inline-start:16px;border-inline-start:1px solid var(--rule);font-size:13px}
+.onpage-title{font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:4px 0 10px}
+.onpage ol{list-style:none;margin:0;padding:0}
+.onpage a{display:flex;align-items:baseline;gap:8px;padding:4px 0;padding-inline-start:15px;margin-inline-start:-17px;border-inline-start:2px solid transparent;color:var(--muted);text-decoration:none;line-height:1.4}
+.onpage a:hover{color:var(--text)}
+.onpage a.is-current{color:var(--accent);border-inline-start-color:var(--accent);font-weight:600}
+.onpage-num{font-family:var(--font-mono);font-size:11.5px;min-width:28px;flex:0 0 auto;font-weight:400}
+
+/* Back to top */
+#to-top{position:fixed;bottom:28px;width:44px;height:44px;border:0;border-radius:50%;background:var(--ink);color:#fff;box-shadow:var(--shadow);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .2s,transform .2s;z-index:5}
+#to-top.is-visible{opacity:1;transform:none;pointer-events:auto}
+#to-top:hover{background:var(--accent)}
+
+/* Narrow screens */
+@media (max-width:1180px){.onpage{display:none}}
+@media (max-width:820px){
+  .rail{position:static;width:auto;inset:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 12px;overflow:visible}
+  .rail-head{flex:1 1 100%;padding:4px 6px 8px}
+  .rail-subtitle,.rail-emblem,.rail-sub,.rail-foot,.rail-group-name{display:none}
+  .rail-group{display:contents}
+  .rail-link{padding:5px 11px;border-radius:999px;font-size:13px;background:rgba(255,255,255,.06);gap:7px}
+  .rail-badge{padding:3px 6px}
+  .page{margin-inline-start:0;padding-block:20px 72px;padding-inline:16px;gap:0}
+  .reading{flex:1 1 auto;width:100%}
+  .section-title{font-size:24px;gap:10px}
+  .num-tile{min-width:40px;height:34px;font-size:13px}
+  .flow-branches{grid-template-columns:1fr}
+}
+
+/* Print */
+@media print{
+  html,body{background:#fff}
+  .rail,.onpage,.faq-tools,#faq-none,#to-top,.copy-btn,.code-more{display:none !important}
+  .page{display:block;margin:0;padding:0}
+  .reading{max-width:none}
+  .guide-section[hidden]{display:block !important}
+  .guide-section{break-before:page;page-break-before:always}
+  .guide-section:first-of-type{break-before:auto;page-break-before:auto}
+  .code{background:#fff;color:#000;border:1px solid #999}
+  .code-bar{background:#eee;color:#000}
+  .code.collapsed pre{max-height:none}
+  .code.collapsed pre::after{display:none}
+  .code pre{white-space:pre-wrap;overflow:visible}
+  details.faq{break-inside:avoid;page-break-inside:avoid}
+  details.faq summary::before{display:none}
+  .card,.flow-node,.callout{break-inside:avoid;page-break-inside:avoid}
+  a{color:inherit}
+}
+</style>
+</head>
+<body data-first="s1" data-faq="s9" data-guide-title="gLuhn">
+<nav class="rail" aria-label="gLuhn">
+<div class="rail-head"><div class="rail-title">gLuhn</div><div class="rail-subtitle">User guide</div></div>
+<div class="rail-emblem"><svg viewBox="0 0 210 36" width="210" height="36" role="img" aria-label="Markdown in, one HTML file out"><g fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="48" height="24" rx="4"/><path d="M10 13h26M10 18h34M10 23h20"/><path d="M58 18h32"/><path d="M85 13l6 5-6 5"/><rect x="98" y="3" width="40" height="30" rx="4"/><path d="M105 11h10M105 17h26M105 23h22"/><path d="M145 18h32"/><path d="M172 13l6 5-6 5"/><rect x="185" y="6" width="22" height="24" rx="4"/><path d="M190 15l4 4 7-8"/></g></svg></div>
+<div class="rail-group"><div class="rail-group-name">Learn</div><a class="rail-link" href="#s1" data-section="s1"><span class="rail-num">01</span><span class="rail-text">Overview</span></a><a class="rail-link" href="#s2" data-section="s2"><span class="rail-num">02</span><span class="rail-text">Quick start</span></a><a class="rail-link" href="#s3" data-section="s3"><span class="rail-num">03</span><span class="rail-text">Concepts</span></a></div><div class="rail-group"><div class="rail-group-name">Apply</div><a class="rail-link" href="#s4" data-section="s4"><span class="rail-num">04</span><span class="rail-text">Installation and files</span></a><a class="rail-link" href="#s5" data-section="s5"><span class="rail-num">05</span><span class="rail-text">Use cases</span><span class="rail-badge">10</span></a><div class="rail-sub"><a href="#s5/5-1-uc1-validate-and-identify-a-number" data-id="s5/5-1-uc1-validate-and-identify-a-number"><span class="rail-sub-num">5.1</span><span>UC1: Validate and identify a number</span></a><a href="#s5/5-2-uc2-complete-a-partially-known-number" data-id="s5/5-2-uc2-complete-a-partially-known-number"><span class="rail-sub-num">5.2</span><span>UC2: Complete a partially known number</span></a><a href="#s5/5-3-uc3-find-the-issuing-bank-offline" data-id="s5/5-3-uc3-find-the-issuing-bank-offline"><span class="rail-sub-num">5.3</span><span>UC3: Find the issuing bank offline</span></a><a href="#s5/5-4-uc4-online-iin-lookup" data-id="s5/5-4-uc4-online-iin-lookup"><span class="rail-sub-num">5.4</span><span>UC4: Online IIN lookup</span></a><a href="#s5/5-5-uc5-scan-a-folder-for-card-numbers" data-id="s5/5-5-uc5-scan-a-folder-for-card-numbers"><span class="rail-sub-num">5.5</span><span>UC5: Scan a folder for card numbers</span></a><a href="#s5/5-6-uc6-produce-evidence-for-an-assessment" data-id="s5/5-6-uc6-produce-evidence-for-an-assessment"><span class="rail-sub-num">5.6</span><span>UC6: Produce evidence for an assessment</span></a><a href="#s5/5-7-uc7-decode-track-data" data-id="s5/5-7-uc7-decode-track-data"><span class="rail-sub-num">5.7</span><span>UC7: Decode track data</span></a><a href="#s5/5-8-uc8-decode-an-emv-chip-dump" data-id="s5/5-8-uc8-decode-an-emv-chip-dump"><span class="rail-sub-num">5.8</span><span>UC8: Decode an EMV chip dump</span></a><a href="#s5/5-9-uc9-extend-or-override-the-scheme-table" data-id="s5/5-9-uc9-extend-or-override-the-scheme-table"><span class="rail-sub-num">5.9</span><span>UC9: Extend or override the scheme table</span></a><a href="#s5/5-10-uc10-mask-output-for-reports" data-id="s5/5-10-uc10-mask-output-for-reports"><span class="rail-sub-num">5.10</span><span>UC10: Mask output for reports</span></a></div><a class="rail-link" href="#s6" data-section="s6"><span class="rail-num">06</span><span class="rail-text">Playbook</span></a></div><div class="rail-group"><div class="rail-group-name">Support</div><a class="rail-link" href="#s7" data-section="s7"><span class="rail-num">07</span><span class="rail-text">Reference</span></a><a class="rail-link" href="#s8" data-section="s8"><span class="rail-num">08</span><span class="rail-text">Troubleshooting</span></a><a class="rail-link" href="#s9" data-section="s9"><span class="rail-num">09</span><span class="rail-text">FAQ</span><span class="rail-badge">20</span></a></div>
+<div class="rail-foot"><div class="rail-hint">Press <kbd>/</kbd> to search the FAQ</div><div class="rail-copy"><div>© 2004-2026 @drgfragkos</div></div></div>
+</nav>
+<div class="page">
+<main class="reading" id="reading">
+<section class="guide-section" id="s1" aria-labelledby="s1-title"><h2 class="section-title" id="s1-title"><span class="num-tile" aria-hidden="true">01</span><span>Overview</span></h2>
+<p>gLuhn answers four questions about a card number: is it well formed (Luhn check digit), which network issued it (IIN range, length rule, MII), which bank issued it (offline BIN list or an online lookup that only ever sends the IIN), and where does it appear in a set of files. It also completes partially known numbers, decodes track 1 / track 2 data and EMV TLV dumps, and recognises test numbers and look-alikes such as IMEIs so that findings are not inflated.</p>
+<p>The tool was written for four jobs:</p>
+<ul>
+<li><strong>Data discovery.</strong> Find cardholder data in file shares, exports, logs and archives, with a
+ confidence score and a CSV or JSON report (see <a class="xref" href="#s5/5-5-uc5-scan-a-folder-for-card-numbers">UC5</a> and <a class="xref" href="#s5/5-6-uc6-produce-evidence-for-an-assessment">UC6</a>).
+</li>
+<li><strong>Digital forensics.</strong> Identify what a recovered number, track string or chip dump is, and
+ which scheme and bank it belongs to (<a class="xref" href="#s5/5-3-uc3-find-the-issuing-bank-offline">UC3</a>, <a class="xref" href="#s5/5-7-uc7-decode-track-data">UC7</a>, <a class="xref" href="#s5/5-8-uc8-decode-an-emv-chip-dump">UC8</a>).
+</li>
+<li><strong>OSINT and investigations.</strong> Complete a number of which only some digits are known (<a class="xref" href="#s5/5-2-uc2-complete-a-partially-known-number">UC2</a>).
+</li>
+<li><strong>PCI DSS and PA DSS assessments.</strong> Produce evidence with masked numbers, flag sensitive
+ authentication data such as full track data, and separate test fixtures from real
+ exposure (<a class="xref" href="#s5/5-6-uc6-produce-evidence-for-an-assessment">UC6</a>, <a class="xref" href="#s5/5-10-uc10-mask-output-for-reports">UC10</a>).
+</li></ul>
+<h3 id="s1/1-1-two-implementations-one-behaviour"><span class="h-num">1.1</span><span class="h-text">Two implementations, one behaviour</span></h3>
+<div class="table-wrap"><table><thead><tr><th>Script</th><th>Runs on</th><th>Notes</th></tr></thead><tbody><tr><td><code>gLuhn.py</code></td><td>Python 3.6 or later, any OS</td><td>Standard library only, no packages to install</td></tr><tr><td><code>gLuhn.ps1</code></td><td>Windows PowerShell 5.1 and PowerShell 7 or later</td><td>One file; detects the engine it runs under</td></tr></tbody></table></div>
+<p>Both scripts accept the same inputs, apply the same scheme table and print the same text. Options differ only in spelling: <code>--scan</code> in Python is <code>-Scan</code> in PowerShell. The reference tables in <a href="#s7">section 7</a> list both forms side by side.</p>
+<div class="callout callout-attention"><div class="callout-label">Attention</div><div class="callout-text"><p>The scripts handle cardholder data. Run them on systems that are in scope for that data, keep reports masked (<code>--mask</code>), and never paste real numbers into tickets or chat. The online lookup is opt-in and transmits at most the first eight digits.</p></div></div>
+<h3 id="s1/1-2-what-the-tool-is-not"><span class="h-num">1.2</span><span class="h-text">What the tool is not</span></h3>
+<p>It is not a card validity service: a number that passes every check may still be closed, blocked or never issued. The scheme table identifies the network from public ranges; bank level attribution needs a BIN list or a lookup service and is only as good as that source.</p>
+</section>
+<section class="guide-section" id="s2" aria-labelledby="s2-title" hidden><h2 class="section-title" id="s2-title"><span class="num-tile" aria-hidden="true">02</span><span>Quick start</span></h2>
+<p>A first result takes a minute. These commands work from the repository folder; replace <code>python3 gLuhn.py</code> with <code>.\gLuhn.ps1</code> on Windows.</p>
+<h3 id="s2/2-1-validate-and-identify-one-number"><span class="h-num">2.1</span><span class="h-text">Validate and identify one number</span></h3>
+<div class="code" dir="ltr" data-lines="2" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>cd gLuhn.py
+python3 gLuhn.py 4542109540018054</code></pre></div>
+<div class="code" dir="ltr" data-lines="6" data-hidden="0"><div class="code-bar"><span class="code-lang">Text</span><button type="button" class="copy-btn">Copy</button></div><pre><code>PAN:          4542 1095 4001 8054  (16 digits)
+Luhn:         valid
+MII:          4 - Banking and financial (Visa)
+IIN:          454210 / 45421095  (6-digit / 8-digit)
+Scheme:       Visa  (IIN range 4; length OK)
+Result:       [+] Valid PAN</code></pre></div>
+<h3 id="s2/2-2-complete-a-partially-known-number"><span class="h-num">2.2</span><span class="h-text">Complete a partially known number</span></h3>
+<p>Replace unknown digits with <code>?</code>. Every completion that passes the Luhn check and belongs to a known scheme with a matching length is printed with its scheme.</p>
+<div class="code" dir="ltr" data-lines="1" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py 4542109540?18054</code></pre></div>
+<div class="code" dir="ltr" data-lines="4" data-hidden="0"><div class="code-bar"><span class="code-lang">Text</span><button type="button" class="copy-btn">Copy</button></div><pre><code>Attempting to generate up to 1 PAN combinations for: 4542109540?18054  (IIN filtered)
+[+] Valid PAN  4542109540018054     Visa
+
+Total valid PAN generated: 1</code></pre></div>
+<h3 id="s2/2-3-scan-a-folder-and-write-a-masked-report"><span class="h-num">2.3</span><span class="h-text">Scan a folder and write a masked report</span></h3>
+<div class="code" dir="ltr" data-lines="1" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py --scan ./exports --format csv --mask &gt; findings.csv</code></pre></div>
+<div class="callout callout-note"><div class="callout-label">Note</div><div class="callout-text"><p>If the commands above do not run, see <a href="#s4">Installation and files</a>. Windows users who get an execution policy error find the one-line fix in <a href="#s4/4.2">4.2</a>.</p></div></div>
+</section>
+<section class="guide-section" id="s3" aria-labelledby="s3-title" hidden><h2 class="section-title" id="s3-title"><span class="num-tile" aria-hidden="true">03</span><span>Concepts</span></h2>
+<h3 id="s3/3-1-anatomy-of-a-pan"><span class="h-num">3.1</span><span class="h-text">Anatomy of a PAN</span></h3>
+<p>A Primary Account Number follows ISO/IEC 7812. It has up to 19 digits (the 2017 edition sets the minimum at 10, earlier editions at 8):</p>
+<div class="code" dir="ltr" data-lines="5" data-hidden="0"><div class="code-bar"><span class="code-lang">Text</span><button type="button" class="copy-btn">Copy</button></div><pre><code>4542 1095 4001 805 4
+|    |              |
+|    |              +-- check digit (Luhn formula, ISO/IEC 7812-1 Annex B)
+|    +-- individual account identifier
++-- Issuer Identification Number (IIN, also called BIN)</code></pre></div>
+<p>The IIN was six digits for decades. ISO/IEC 7812-1:2017 extended it to eight digits, with an industry migration date of April 2022. gLuhn prints both the six and the eight digit IIN because BIN lists and lookup services still exist in both granularities.</p>
+<h3 id="s3/3-2-major-industry-identifier"><span class="h-num">3.2</span><span class="h-text">Major Industry Identifier</span></h3>
+<p>The first digit (MII) says which industry assigned the number.</p>
+<div class="table-wrap"><table><thead><tr><th>Digit</th><th>Industry</th><th>Typical schemes</th></tr></thead><tbody><tr><td>0</td><td>ISO/TC 68 and other industry assignments</td><td></td></tr><tr><td>1</td><td>Airlines</td><td>UATP</td></tr><tr><td>2</td><td>Airlines, financial and other future industry assignments</td><td>Mastercard 2-series, Mir, BORICA</td></tr><tr><td>3</td><td>Travel and entertainment</td><td>American Express, Diners Club, JCB</td></tr><tr><td>4</td><td>Banking and financial</td><td>Visa</td></tr><tr><td>5</td><td>Banking and financial</td><td>Mastercard, Maestro</td></tr><tr><td>6</td><td>Merchandising and banking/financial</td><td>Discover, UnionPay, Maestro</td></tr><tr><td>7</td><td>Petroleum and other future industry assignments</td><td></td></tr><tr><td>8</td><td>Healthcare, telecommunications and other future industry assignments</td><td></td></tr><tr><td>9</td><td>National assignment: digits 2 to 4 are the ISO 3166-1 numeric country code</td><td>Troy (9792, Turkey), Napas (9704, Vietnam), Humo (9860, Uzbekistan)</td></tr></tbody></table></div>
+<h3 id="s3/3-3-the-luhn-check"><span class="h-num">3.3</span><span class="h-text">The Luhn check</span></h3>
+<p>The last digit is a check digit computed from the others: starting from the right, every second digit is doubled (9 is subtracted when the result exceeds 9), all digits are summed, and the total must be divisible by ten. The check catches every single-digit error and most transpositions. It proves nothing about the account: 1111222233334444 passes.</p>
+<p>gLuhn uses the formula in three ways: to validate, to compute the missing check digit, and to solve one unknown digit anywhere in the number directly, which is why a pattern with k unknown digits costs 10^(k-1) candidates instead of 10^k.</p>
+<h3 id="s3/3-4-schemes-ranges-and-precedence"><span class="h-num">3.4</span><span class="h-text">Schemes, ranges and precedence</span></h3>
+<p>The built-in table lists 38 networks with their IIN ranges and allowed lengths, from Visa, Mastercard, American Express, Discover, JCB, UnionPay, Diners Club and Maestro to domestic schemes such as Mir, Troy, RuPay, Elo, Verve, Dankort and UATP, plus defunct schemes (Laser, Solo, Switch, Bankcard, enRoute) so that historical data is still identified. Print it with <code>--list-schemes</code>.</p>
+<p>When ranges overlap, the winner is decided in this order:</p>
+<ol>
+<li>A range whose length rule fits beats one that does not. A 19-digit number starting with
+ 4571 is a Visa, not a malformed Dankort.
+</li>
+<li>The longer, more specific range wins: 622126 to 622925 (Discover) beats 62 (UnionPay).
+</li>
+<li>A catch-all range (Maestro 50 and 56 to 69) loses to any range of the same length.
+</li>
+<li>An active scheme beats a defunct one: Maestro 6304 beats Laser 6304.
+</li></ol>
+<p>Every other match is still printed under &quot;Also matches&quot;, so an ambiguous prefix such as 81 (UnionPay and RuPay) is never hidden.</p>
+<h3 id="s3/3-5-validation-levels"><span class="h-num">3.5</span><span class="h-text">Validation levels</span></h3>
+<p>Without options a number only has to be well formed and pass Luhn, which is what version 0.8 of the tool did. With <code>--iin</code> (<code>-i</code>) the IIN must be known and the length must fit the scheme. Generation and scanning always apply the IIN filter unless <code>--no-iin</code> is given.</p>
+<h3 id="s3/3-6-confidence-score-in-scan-results"><span class="h-num">3.6</span><span class="h-text">Confidence score in scan results</span></h3>
+<p>Every scan hit carries a score from 0 to 100 and a level (HIGH at 70 or more, MEDIUM at 45 or more, LOW below). The score starts at 40 and moves with the signals that are printed next to each hit:</p>
+<div class="table-wrap"><table><thead><tr><th>Signal</th><th>Effect</th><th>Why</th></tr></thead><tbody><tr><td>specific IIN (range of 4 or more digits)</td><td>+15</td><td>the prefix is unambiguous</td></tr><tr><td>catch-all IIN</td><td>-15</td><td>Maestro 50 / 56-69 match many non-card numbers</td></tr><tr><td>unknown IIN (only with <code>--no-iin</code>)</td><td>-20</td><td>no scheme claims the prefix</td></tr><tr><td>grouped digits (4-4-4-4 with spaces or dashes)</td><td>+10</td><td>people and systems format cards this way</td></tr><tr><td>sequential or repeated digits</td><td>-25</td><td>4111111111111111 style numbers are fixtures</td></tr><tr><td>known test number</td><td>-25</td><td>published sandbox numbers are not cardholder data</td></tr><tr><td>looks like IMEI or ICCID</td><td>-30</td><td>another Luhn-checked identifier</td></tr><tr><td>card keyword nearby</td><td>+20</td><td>&quot;card&quot;, &quot;PAN&quot;, &quot;Visa&quot;, &quot;CVV&quot;, &quot;expiry&quot; within 48 characters</td></tr><tr><td>expiry nearby</td><td>+10</td><td>an MM/YY next to a PAN also means sensitive data</td></tr><tr><td>CVV-like value nearby</td><td>+5</td><td>three or four digits near a &quot;CVV&quot; or &quot;CVC&quot; keyword</td></tr></tbody></table></div>
+<p>Use <code>--min-score</code> to keep only the hits above a threshold, and read the signals before raising a finding.</p>
+<h3 id="s3/3-7-sensitive-authentication-data"><span class="h-num">3.7</span><span class="h-text">Sensitive authentication data</span></h3>
+<p>Track 1 and track 2 data, the card verification value and PIN data are sensitive authentication data (SAD). PCI DSS v4 requirement 3.3.1 forbids storing them after authorisation. gLuhn prints an attention line whenever it decodes track data or chip data, shows the typical PVKI / PVV / CVV1 layout of track 2 discretionary data so investigators recognise it, and flags expiry dates or CVV-like values found next to a PAN during a scan.</p>
+</section>
+<section class="guide-section" id="s4" aria-labelledby="s4-title" hidden><h2 class="section-title" id="s4-title"><span class="num-tile" aria-hidden="true">04</span><span>Installation and files</span></h2>
+<h3 id="s4/4-1-python"><span class="h-num">4.1</span><span class="h-text">Python</span></h3>
+<p>Any Python 3.6 or newer works. There is nothing to install.</p>
+<div class="code" dir="ltr" data-lines="4" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>git clone https://github.com/drgfragkos/gLuhn.py.git
+cd gLuhn.py
+python3 gLuhn.py --version
+python3 -m unittest discover -s tests</code></pre></div>
+<h3 id="s4/4-2-powershell"><span class="h-num">4.2</span><span class="h-text">PowerShell</span></h3>
+<p>The script runs unchanged on Windows PowerShell 5.1 (built into Windows) and on PowerShell 7 (Windows, Linux, macOS). If scripts are blocked, allow them for the current process only.</p>
+<div class="code" dir="ltr" data-lines="4" data-hidden="0"><div class="code-bar"><span class="code-lang">PowerShell</span><button type="button" class="copy-btn">Copy</button></div><pre><code>cd gLuhn.py
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\gLuhn.ps1 -Version
+powershell -ExecutionPolicy Bypass -File tests\gLuhn.Tests.ps1</code></pre></div>
+<p><code>-Version</code> prints which engine ran the script. The test script needs no Pester.</p>
+<div class="callout callout-note"><div class="callout-label">Note</div><div class="callout-text"><p>When stdin is redirected, the PowerShell host feeds it to the script as pipeline input and waits for end of file. Give scheduled or CI runs an explicit <code>&lt; NUL</code> (Windows) or <code>&lt; /dev/null</code> (Linux) unless you really pipe numbers in with <code>-File -</code>.</p></div></div>
+<h3 id="s4/4-3-optional-data"><span class="h-num">4.3</span><span class="h-text">Optional data</span></h3>
+<div class="table-wrap"><table><thead><tr><th>Data</th><th>How to get it</th><th>Used by</th></tr></thead><tbody><tr><td>BIN list (issuing bank, country, card type)</td><td><code>--update-bin-db</code> downloads the open binlist-data CSV (about 25 MB) to <code>~/.gluhn/binlist-data.csv</code></td><td><code>--bin-db auto</code></td></tr><tr><td>Online lookup</td><td>none; <code>--lookup</code> queries binlist.net or any service with a <code>{iin}</code> URL</td><td><code>--lookup</code></td></tr><tr><td>Extra or corrected IIN ranges</td><td>a JSON file, see <a class="xref" href="#s5/5-9-uc9-extend-or-override-the-scheme-table">UC9</a>, or <code>Tools/update_iin_table.py</code></td><td><code>--iin-table</code></td></tr></tbody></table></div>
+<h3 id="s4/4-4-files-in-the-repository"><span class="h-num">4.4</span><span class="h-text">Files in the repository</span></h3>
+<div class="cards"><a class="card" href="#s5/5-1-uc1-validate-and-identify-a-number"><div class="card-name">Build-UserGuide.ps1</div><div class="card-folder" dir="ltr">Tools/</div><p class="card-for">Compiles Docs/User-Guide.md into this single-file HTML guide. See Docs/guide/README.md.</p><div class="card-needs">PowerShell 5.1 or 7</div></a><a class="card" href="#s5/5-1-uc1-validate-and-identify-a-number"><div class="card-name">gLuhn.ps1</div><div class="card-folder" dir="ltr">repository root</div><p class="card-for">The PowerShell implementation with the same options and output.</p><div class="card-needs">Windows PowerShell 5.1 or PowerShell 7</div></a><a class="card" href="#s5/5-1-uc1-validate-and-identify-a-number"><div class="card-name">gLuhn.py</div><div class="card-folder" dir="ltr">repository root</div><p class="card-for">The Python implementation. Validation, generation, scanning, track and EMV decoding, issuer lookup.</p><div class="card-needs">Python 3.6 or later, standard library only</div></a><a class="card" href="#s5/5-1-uc1-validate-and-identify-a-number"><div class="card-name">tests</div><div class="card-folder" dir="ltr">tests/</div><p class="card-for">test_gluhn.py (unittest) and gLuhn.Tests.ps1 (no Pester). Both suites cover every mode and compare behaviour.</p><div class="card-needs">Python 3 or PowerShell</div></a><a class="card" href="#s5/5-9-uc9-extend-or-override-the-scheme-table"><div class="card-name">update_iin_table.py</div><div class="card-folder" dir="ltr">Tools/</div><p class="card-for">Regenerates Tools/iin-table.braintree.json from the open-source braintree range list for use with --iin-table.</p><div class="card-needs">Python 3, network access to GitHub</div></a></div>
+</section>
+<section class="guide-section" id="s5" aria-labelledby="s5-title" hidden><h2 class="section-title" id="s5-title"><span class="num-tile" aria-hidden="true">05</span><span>Use cases</span></h2>
+<p>Each walkthrough has the same four parts: the situation, the command, what to expect, and the next step. Python commands are shown; the PowerShell spelling of every option is in <a href="#s7/7.1">7.1</a>.</p>
+<h3 id="s5/5-1-uc1-validate-and-identify-a-number"><span class="h-num">5.1</span><span class="h-text">UC1: Validate and identify a number</span></h3>
+<p><strong>Situation.</strong> A number turned up in a document and you need to know whether it is a card and which network it belongs to.</p>
+<div class="code" dir="ltr" data-lines="1" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py -i 4542109540018054 3742109545565554</code></pre></div>
+<p><strong>Expect.</strong> One block per number. The first is a valid Visa. The second passes Luhn but is rejected with <code>-i</code> because American Express numbers have 15 digits, not 16:</p>
+<div class="code" dir="ltr" data-lines="2" data-hidden="0"><div class="code-bar"><span class="code-lang">Text</span><button type="button" class="copy-btn">Copy</button></div><pre><code>Scheme:       American Express  (IIN range 37; length mismatch, expects 15)
+Result:       [-] Invalid PAN  (American Express numbers are 15 digits, not 16)</code></pre></div>
+<p>A published test number is labelled (<code>Test number: ... Stripe</code>) and a 15-digit Luhn number with a phone TAC prefix is labelled as a probable IMEI.</p>
+<p><strong>Next.</strong> Add <code>--bin-db auto</code> or <code>--lookup</code> for the issuing bank (<a class="xref" href="#s5/5-3-uc3-find-the-issuing-bank-offline">UC3</a>, <a class="xref" href="#s5/5-4-uc4-online-iin-lookup">UC4</a>), <code>-q</code> for one line per number, <code>-j</code> for JSON.</p>
+<h3 id="s5/5-2-uc2-complete-a-partially-known-number"><span class="h-num">5.2</span><span class="h-text">UC2: Complete a partially known number</span></h3>
+<p><strong>Situation.</strong> A receipt shows <code>4542 10** **** 8054</code>, or a statement lost a digit, and you need the candidates.</p>
+<div class="code" dir="ltr" data-lines="2" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py '454210??????8054'
+python3 gLuhn.py -b visa,mastercard '??42109545565554'</code></pre></div>
+<p><strong>Expect.</strong> The first line states the worst case number of candidates (10 to the power of unknown digits minus one). Each valid completion is printed with its scheme and a total at the end. <code>-b</code> restricts the search to the named schemes; <code>--no-iin</code> lists every Luhn-valid completion regardless of scheme.</p>
+<p><strong>Next.</strong> Patterns with more than seven unknown digits are refused by default; raise <code>--max</code> deliberately, and prefer <code>-b</code> to keep the output meaningful.</p>
+<div class="callout callout-attention"><div class="callout-label">Attention</div><div class="callout-text"><p>Generated numbers are candidates, not accounts. Do not attempt transactions with them.</p></div></div>
+<h3 id="s5/5-3-uc3-find-the-issuing-bank-offline"><span class="h-num">5.3</span><span class="h-text">UC3: Find the issuing bank offline</span></h3>
+<p><strong>Situation.</strong> You need the bank, country and card type for a batch of numbers without sending anything over the network at query time.</p>
+<div class="code" dir="ltr" data-lines="2" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py --update-bin-db --bin-db auto -q 4542109540018054
+python3 gLuhn.py --bin-db auto -f numbers.txt</code></pre></div>
+<p><strong>Expect.</strong> The first command downloads the open binlist-data CSV once (about 25 MB, from GitHub) and prints <code>[i] BIN database loaded: 343063 rows</code>. Each result then carries an issuer line:</p>
+<div class="code" dir="ltr" data-lines="1" data-hidden="0"><div class="code-bar"><span class="code-lang">Text</span><button type="button" class="copy-btn">Copy</button></div><pre><code>Issuer (DB):  UC CARD CO., LTD. | VISA | CREDIT | CLASSIC | Japan  [454210]</code></pre></div>
+<p>Any CSV with a header naming a start column (<code>bin</code>, <code>iin</code>, <code>iin_start</code>, <code>prefix</code>) works; an optional end column (<code>iin_end</code>, <code>bin_end</code>) turns rows into ranges. The longest matching prefix wins, so eight digit rows beat six digit rows.</p>
+<p><strong>Next.</strong> For scans, <code>--bin-db</code> fills the issuer column of the CSV report (<a class="xref" href="#s5/5-6-uc6-produce-evidence-for-an-assessment">UC6</a>).</p>
+<h3 id="s5/5-4-uc4-online-iin-lookup"><span class="h-num">5.4</span><span class="h-text">UC4: Online IIN lookup</span></h3>
+<p><strong>Situation.</strong> You have a handful of numbers and no BIN list at hand.</p>
+<div class="code" dir="ltr" data-lines="2" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py --lookup 4542109540018054
+python3 gLuhn.py --lookup --lookup-url 'https://bins.example.internal/api/{iin}' 4542109540018054</code></pre></div>
+<p><strong>Expect.</strong> A notice that only the IIN is sent, then a lookup line with bank, scheme, brand, type and country as returned by the service. The eight digit IIN is tried first, then the six digit one. Results are cached per IIN for the run, and errors (rate limit, time-out, no network) are reported on the lookup line without failing the validation.</p>
+<p><strong>Next.</strong> Public services such as binlist.net are rate limited; for batch work download the BIN list instead (<a class="xref" href="#s5/5-3-uc3-find-the-issuing-bank-offline">UC3</a>).</p>
+<div class="callout callout-attention"><div class="callout-label">Attention</div><div class="callout-text"><p>The lookup transmits the first eight digits of each distinct IIN to the service you name, nothing else. Do not point it at a service you do not trust with that information, and prefer the offline list in regulated environments.</p></div></div>
+<h3 id="s5/5-5-uc5-scan-a-folder-for-card-numbers"><span class="h-num">5.5</span><span class="h-text">UC5: Scan a folder for card numbers</span></h3>
+<p><strong>Situation.</strong> A file share, an export folder or a forensic image mount must be checked for cardholder data.</p>
+<div class="code" dir="ltr" data-lines="2" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py --scan /mnt/share --mask
+python3 gLuhn.py --scan /mnt/share --exclude '*.bak' --exclude node_modules --include '*.txt' --include '*.csv'</code></pre></div>
+<p><strong>Expect.</strong> One line per hit with confidence level, score, masked number, scheme, and <code>file:line:column</code>, followed by the signals that produced the score. Folders are walked recursively; ZIP, DOCX, XLSX and PPTX archives are opened (nested up to three levels), PDFs are read best-effort, UTF-16 files are decoded with or without a byte order mark, and other files are scanned as text. Files over 64 MB are skipped and listed at the end.</p>
+<div class="code" dir="ltr" data-lines="6" data-hidden="0"><div class="code-bar"><span class="code-lang">Text</span><button type="button" class="copy-btn">Copy</button></div><pre><code>[+] HIGH    80  454210******8054         Visa                         /mnt/share/orders.txt:2:7
+    grouped digits, card keyword nearby, expiry nearby (possible SAD)
+[+] LOW     15  424242******4242         Visa                         /mnt/share/dev/notes.log:1:6
+    known test number (Stripe)
+
+Scanned 5 source(s); candidate PANs found: 2</code></pre></div>
+<p><strong>Next.</strong> Keep the HIGH and MEDIUM hits, review the LOW ones for context, and produce a report (<a class="xref" href="#s5/5-6-uc6-produce-evidence-for-an-assessment">UC6</a>). <code>--min-score 45</code> drops the LOW hits from the output altogether.</p>
+<h3 id="s5/5-6-uc6-produce-evidence-for-an-assessment"><span class="h-num">5.6</span><span class="h-text">UC6: Produce evidence for an assessment</span></h3>
+<p><strong>Situation.</strong> The findings must go into a PCI DSS or incident report without exposing the numbers.</p>
+<div class="code" dir="ltr" data-lines="2" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py --scan ./exports --format csv --mask-style 8-4 --bin-db auto &gt; findings.csv
+python3 gLuhn.py --scan ./exports --format jsonl --mask | tee findings.jsonl</code></pre></div>
+<p><strong>Expect.</strong> The CSV has one row per hit with source, line, column, masked PAN, scheme, IIN range, confidence, score, signals, test card source, look-alike kind, issuer, duplicate flag and the SHA-256 of the source file. <code>--mask-style 8-4</code> shows the first eight and last four digits, which PCI DSS v4 permits for PANs of 16 digits or more; shorter numbers fall back to six and four. JSON Lines carries the full result object per hit for SIEM ingestion.</p>
+<p><strong>Next.</strong> Sort by confidence, remove rows with a test card source, and attach the hashes so the reviewed files can be identified later.</p>
+<h3 id="s5/5-7-uc7-decode-track-data"><span class="h-num">5.7</span><span class="h-text">UC7: Decode track data</span></h3>
+<p><strong>Situation.</strong> A magnetic-stripe read, a skimmer dump or a log line contains something like <code>;4542109540018054=2512201123456789?</code>.</p>
+<div class="code" dir="ltr" data-lines="3" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py ';4542109540018054=2512201123456789?'
+python3 gLuhn.py '%B4542109540018054^DOE/JOHN^25121011234567890?'
+python3 gLuhn.py 4542109540018054D25122011234567890F</code></pre></div>
+<p><strong>Expect.</strong> The track type (track 1, track 2, or EMV tag 57 with the <code>D</code> separator), the cardholder name on track 1, the expiry with a sanity verdict (expired, far future, invalid month), the three digit service code decoded line by line (interchange and chip use, authorisation processing, allowed services and PIN rule), the discretionary data with the typical PVKI / PVV / CVV1 layout, an attention line about sensitive authentication data, and the normal PAN assessment.</p>
+<p><strong>Next.</strong> Add <code>--mask</code> before pasting the output anywhere; it hides the PAN and the discretionary data.</p>
+<h3 id="s5/5-8-uc8-decode-an-emv-chip-dump"><span class="h-num">5.8</span><span class="h-text">UC8: Decode an EMV chip dump</span></h3>
+<p><strong>Situation.</strong> A terminal log, a card reader tool or a forensic extraction gives you TLV hex such as <code>70 81 87 5A 08 45 42 ...</code>.</p>
+<div class="code" dir="ltr" data-lines="2" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py --emv 5A0845421095400180545F24032512315F340101
+python3 gLuhn.py --emv @record.hex --mask</code></pre></div>
+<p><strong>Expect.</strong> A tree of tags with names and decoded values: application PAN (5A), expiry (5F24), PAN sequence number (5F34), cardholder name (5F20), track 2 equivalent (57, 9F6B), AID (4F, 84) mapped to scheme and product, issuer country (5F28), service code (5F30), and bit by bit decodes of the AIP (82), AUC (9F07), CVM list (8E), TVR (95), TSI (9B), CID (9F27), terminal capabilities and more. A summary block follows, then the PAN assessment. A warning is printed when the AID names one scheme and the PAN prefix another.</p>
+<p><strong>Next.</strong> <code>-j</code> gives the whole tree as JSON. Hex may contain spaces, colons or <code>0x</code> prefixes; <code>@file</code> reads it from a file.</p>
+<h3 id="s5/5-9-uc9-extend-or-override-the-scheme-table"><span class="h-num">5.9</span><span class="h-text">UC9: Extend or override the scheme table</span></h3>
+<p><strong>Situation.</strong> A private label card, a new domestic scheme or a corrected range is missing from the built-in table.</p>
+<div class="code" dir="ltr" data-lines="7" data-hidden="0"><div class="code-bar"><span class="code-lang">JSON</span><button type="button" class="copy-btn">Copy</button></div><pre><code>{
+  &quot;schemes&quot;: [
+    { &quot;key&quot;: &quot;acme&quot;, &quot;name&quot;: &quot;ACME Store Card&quot;, &quot;ranges&quot;: [&quot;7001-7002&quot;], &quot;lengths&quot;: [16],
+      &quot;note&quot;: &quot;private label&quot; },
+    { &quot;key&quot;: &quot;visa&quot;, &quot;name&quot;: &quot;Visa&quot;, &quot;ranges&quot;: [&quot;4&quot;], &quot;lengths&quot;: [16, 19] }
+  ]
+}</code></pre></div>
+<div class="code" dir="ltr" data-lines="4" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py --iin-table my-schemes.json --list-schemes
+python3 gLuhn.py --iin-table my-schemes.json -i 7001000000000004
+python3 Tools/update_iin_table.py
+python3 gLuhn.py --iin-table Tools/iin-table.braintree.json 4111111111111111</code></pre></div>
+<p><strong>Expect.</strong> A scheme whose key matches a built-in one replaces it in place; new keys are appended. <code>&quot;replace&quot;: true</code> discards the built-in table. <code>update_iin_table.py</code> regenerates a table from the open-source braintree range list so updates become a data refresh.</p>
+<p><strong>Next.</strong> Keep the JSON under version control next to your reports so results are reproducible.</p>
+<h3 id="s5/5-10-uc10-mask-output-for-reports"><span class="h-num">5.10</span><span class="h-text">UC10: Mask output for reports</span></h3>
+<p><strong>Situation.</strong> Any output that leaves the analysis machine must not contain full PANs.</p>
+<div class="code" dir="ltr" data-lines="2" data-hidden="0"><div class="code-bar"><span class="code-lang">Bash</span><button type="button" class="copy-btn">Copy</button></div><pre><code>python3 gLuhn.py --mask -q -f numbers.txt
+python3 gLuhn.py --mask-style last4 ';4542109540018054=2512201123456789?'</code></pre></div>
+<p><strong>Expect.</strong> <code>--mask</code> shows the first six and last four digits. <code>--mask-style 8-4</code> shows eight and four for PANs of 16 digits or more, <code>last4</code> only the last four, <code>full</code> nothing. Masking also applies to JSON, CSV, track discretionary data and EMV output.</p>
+<p><strong>Next.</strong> Masking is applied at output time only; results and exit codes are unchanged.</p>
+</section>
+<section class="guide-section" id="s6" aria-labelledby="s6-title" hidden><h2 class="section-title" id="s6-title"><span class="num-tile" aria-hidden="true">06</span><span>Playbook</span></h2>
+<p>The sequence an experienced analyst follows when a number, a string or a dump turns up.</p>
+<div class="flow" role="list"><div class="flow-node flow-start" role="listitem"><span class="flow-badge">Start</span><div class="flow-body"><div class="flow-text">Something that looks like a card number arrived</div></div></div><div class="flow-arrow" aria-hidden="true"><svg viewBox="0 0 16 22" width="16" height="22" aria-hidden="true" focusable="false"><path d="M8 1v16M3 13l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="flow-node flow-step" role="listitem"><span class="flow-badge">Step</span><div class="flow-body"><div class="flow-text">Validate and identify it</div><code class="flow-cmd" dir="ltr">python3 gLuhn.py -i &lt;number&gt;</code></div></div><div class="flow-arrow" aria-hidden="true"><svg viewBox="0 0 16 22" width="16" height="22" aria-hidden="true" focusable="false"><path d="M8 1v16M3 13l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="flow-node flow-see" role="listitem"><span class="flow-badge">See</span><div class="flow-body"><div class="flow-text">Scheme, IIN range, length verdict, test number or look-alike labels</div></div></div><div class="flow-arrow" aria-hidden="true"><svg viewBox="0 0 16 22" width="16" height="22" aria-hidden="true" focusable="false"><path d="M8 1v16M3 13l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="flow-node flow-decide" role="listitem"><span class="flow-badge">Decide</span><div class="flow-body"><div class="flow-text">Is it a real card number?</div><dl class="flow-branches"><div class="flow-branch"><dt>Test number or look-alike</dt><dd>record it as a fixture or an IMEI/ICCID, no finding</dd></div><div class="flow-branch"><dt>Luhn fails or unknown IIN</dt><dd>probably not a PAN; note it and move on</dd></div><div class="flow-branch"><dt>Valid and identified</dt><dd>continue</dd></div></dl></div></div><div class="flow-arrow" aria-hidden="true"><svg viewBox="0 0 16 22" width="16" height="22" aria-hidden="true" focusable="false"><path d="M8 1v16M3 13l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="flow-node flow-decide" role="listitem"><span class="flow-badge">Decide</span><div class="flow-body"><div class="flow-text">Do you need the issuing bank?</div><dl class="flow-branches"><div class="flow-branch"><dt>Offline list available</dt><dd>python3 gLuhn.py --bin-db auto &lt;number&gt;</dd></div><div class="flow-branch"><dt>No list, few numbers</dt><dd>python3 gLuhn.py --lookup &lt;number&gt; (sends the IIN only)</dd></div></dl></div></div><div class="flow-arrow" aria-hidden="true"><svg viewBox="0 0 16 22" width="16" height="22" aria-hidden="true" focusable="false"><path d="M8 1v16M3 13l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="flow-node flow-decide" role="listitem"><span class="flow-badge">Decide</span><div class="flow-body"><div class="flow-text">Did it come from a stripe read or a chip dump?</div><dl class="flow-branches"><div class="flow-branch"><dt>Track string</dt><dd>python3 gLuhn.py '&lt;track data&gt;'; note the SAD warning</dd></div><div class="flow-branch"><dt>TLV hex</dt><dd>python3 gLuhn.py --emv @dump.hex</dd></div></dl></div></div><div class="flow-arrow" aria-hidden="true"><svg viewBox="0 0 16 22" width="16" height="22" aria-hidden="true" focusable="false"><path d="M8 1v16M3 13l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="flow-node flow-decide" role="listitem"><span class="flow-badge">Decide</span><div class="flow-body"><div class="flow-text">Are there more where this came from?</div><dl class="flow-branches"><div class="flow-branch"><dt>Yes</dt><dd>python3 gLuhn.py --scan &lt;folder&gt; --format csv --mask &gt; findings.csv</dd></div><div class="flow-branch"><dt>No</dt><dd>write up the single finding with masked output</dd></div></dl></div></div><div class="flow-arrow" aria-hidden="true"><svg viewBox="0 0 16 22" width="16" height="22" aria-hidden="true" focusable="false"><path d="M8 1v16M3 13l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="flow-node flow-end" role="listitem"><span class="flow-badge">End</span><div class="flow-body"><div class="flow-text">Report with masked numbers, confidence levels and file hashes</div></div></div></div>
+<div class="callout callout-note"><div class="callout-label">Note</div><div class="callout-text"><p>Keep the three verdicts apart in the write-up: well formed (Luhn), identified (scheme and length), attributed (bank). A finding is only as strong as the weakest one you actually checked.</p></div></div>
+</section>
+<section class="guide-section" id="s7" aria-labelledby="s7-title" hidden><h2 class="section-title" id="s7-title"><span class="num-tile" aria-hidden="true">07</span><span>Reference</span></h2>
+<h3 id="s7/7-1-options"><span class="h-num">7.1</span><span class="h-text">Options</span></h3>
+<div class="table-wrap"><table><thead><tr><th>Python</th><th>PowerShell</th><th>Meaning</th></tr></thead><tbody><tr><td><code>PAN ...</code></td><td><code>PAN ...</code></td><td>numbers, <code>?</code> patterns or track strings; separators (spaces, dashes, dots) are ignored</td></tr><tr><td><code>-i</code>, <code>--iin</code></td><td><code>-i</code>, <code>-Iin</code></td><td>validation also requires a known IIN and a fitting length</td></tr><tr><td><code>--no-iin</code></td><td><code>-NoIin</code></td><td>generation and scan: Luhn only, no IIN filter</td></tr><tr><td><code>--ignore-length</code></td><td><code>-IgnoreLength</code></td><td>a length mismatch is not a failure</td></tr><tr><td><code>-b</code>, <code>--brand LIST</code></td><td><code>-b</code>, <code>-Brand LIST</code></td><td>restrict matching to these schemes (keys or names, comma separated)</td></tr><tr><td><code>--active-only</code></td><td><code>-ActiveOnly</code></td><td>ignore defunct schemes</td></tr><tr><td><code>--no-catch-all</code></td><td><code>-NoCatchAll</code></td><td>ignore the Maestro catch-all ranges 50 and 56-69</td></tr><tr><td><code>--iin-table JSON</code></td><td><code>-IinTable JSON</code></td><td>extend or override the scheme table</td></tr><tr><td><code>--max N</code></td><td><code>-Max N</code></td><td>refuse generation above N Luhn candidates (default 10 million Python, 1 million PowerShell)</td></tr><tr><td><code>-f</code>, <code>--file FILE</code></td><td><code>-f</code>, <code>-File FILE</code></td><td>one input per line; <code>-</code> reads stdin; <code>#</code> starts a comment</td></tr><tr><td><code>--scan PATH</code></td><td><code>-Scan PATH</code></td><td>scan a file, folder, archive or <code>-</code></td></tr><tr><td><code>--include GLOB</code></td><td><code>-Include GLOB</code></td><td>scan only matching file names (repeat the option in Python; comma list or array in PowerShell)</td></tr><tr><td><code>--exclude GLOB</code></td><td><code>-Exclude GLOB</code></td><td>skip matching files and folders</td></tr><tr><td><code>--no-recursive</code></td><td><code>-NoRecursive</code></td><td>top level of the folder only</td></tr><tr><td><code>--no-archives</code></td><td><code>-NoArchives</code></td><td>do not open ZIP and Office files</td></tr><tr><td><code>--max-file-size MB</code></td><td><code>-MaxFileSize MB</code></td><td>skip larger files (default 64)</td></tr><tr><td><code>--min-score N</code></td><td><code>-MinScore N</code></td><td>report only hits with score N or more</td></tr><tr><td><code>--emv HEX</code></td><td><code>-Emv HEX</code></td><td>decode EMV TLV data; <code>@file</code> reads a file</td></tr><tr><td><code>--bin-db CSV</code></td><td><code>-BinDb CSV</code></td><td>BIN list for issuer lookup; <code>auto</code> means the downloaded file</td></tr><tr><td><code>--update-bin-db</code></td><td><code>-UpdateBinDb</code></td><td>download the open binlist-data CSV first</td></tr><tr><td><code>--lookup</code></td><td><code>-Lookup</code></td><td>online IIN lookup (IIN only)</td></tr><tr><td><code>--lookup-url URL</code></td><td><code>-LookupUrl URL</code></td><td>lookup template containing <code>{iin}</code> (default binlist.net)</td></tr><tr><td><code>--lookup-timeout SEC</code></td><td><code>-LookupTimeout SEC</code></td><td>lookup time-out (default 8)</td></tr><tr><td><code>-m</code>, <code>--mask</code></td><td><code>-m</code>, <code>-Mask</code></td><td>mask PANs in the output (first 6, last 4)</td></tr><tr><td><code>--mask-style STYLE</code></td><td><code>-MaskStyle STYLE</code></td><td><code>6-4</code>, <code>8-4</code>, <code>last4</code>, <code>full</code>; implies mask</td></tr><tr><td><code>--format FMT</code></td><td><code>-Format FMT</code></td><td><code>text</code>, <code>json</code>, <code>jsonl</code>, <code>csv</code></td></tr><tr><td><code>-j</code>, <code>--json</code></td><td><code>-j</code>, <code>-Json</code></td><td>same as <code>--format json</code></td></tr><tr><td><code>-q</code>, <code>--quiet</code></td><td><code>-q</code>, <code>-Quiet</code></td><td>one line per number</td></tr><tr><td><code>--list-schemes</code></td><td><code>-ListSchemes</code></td><td>print the scheme table and the MII legend</td></tr><tr><td><code>-V</code>, <code>--version</code></td><td><code>-Version</code></td><td>version (PowerShell also prints the engine)</td></tr></tbody></table></div>
+<h3 id="s7/7-2-exit-codes"><span class="h-num">7.2</span><span class="h-text">Exit codes</span></h3>
+<div class="table-wrap"><table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody><tr><td>0</td><td>at least one valid number, generated candidate or scan hit</td></tr><tr><td>1</td><td>nothing valid (also: EMV data could not be decoded)</td></tr><tr><td>2</td><td>usage error: no input, bad option, unreadable BIN list or IIN table</td></tr></tbody></table></div>
+<h3 id="s7/7-3-text-output-fields"><span class="h-num">7.3</span><span class="h-text">Text output fields</span></h3>
+<div class="table-wrap"><table><thead><tr><th>Line</th><th>Meaning</th></tr></thead><tbody><tr><td><code>Luhn</code></td><td>valid or INVALID; schemes without a Luhn digit (enRoute) are noted</td></tr><tr><td><code>MII</code></td><td>first digit and industry; for 9 the country decoded from digits 2 to 4</td></tr><tr><td><code>IIN</code></td><td>six and eight digit issuer identification number</td></tr><tr><td><code>Scheme</code></td><td>best match, its IIN range, the length verdict; defunct schemes are marked</td></tr><tr><td><code>Also matches</code></td><td>every other scheme whose range matched</td></tr><tr><td><code>Issuer (DB)</code></td><td>issuer, brand, type, category and country from the BIN list</td></tr><tr><td><code>Lookup</code></td><td>the online service result or its error</td></tr><tr><td><code>Test number</code></td><td>the source that publishes the number as a test fixture</td></tr><tr><td><code>Look-alike</code></td><td>IMEI or ICCID hint</td></tr><tr><td><code>Result</code></td><td>the verdict and the reasons when invalid</td></tr></tbody></table></div>
+<h3 id="s7/7-4-json-fields"><span class="h-num">7.4</span><span class="h-text">JSON fields</span></h3>
+<p>Validation objects carry <code>pan</code>, <code>length</code>, <code>well_formed</code>, <code>luhn</code>, <code>luhn_expected</code>, <code>mii</code>, <code>iin6</code>, <code>iin8</code>, <code>scheme</code>, <code>scheme_key</code>, <code>scheme_active</code>, <code>scheme_note</code>, <code>iin_range</code>, <code>length_ok</code>, <code>expected_lengths</code>, <code>also_matches</code>, <code>issuer</code>, <code>test_card</code>, <code>lookalike</code>, <code>lookup</code>, <code>valid</code> and <code>reasons</code>. Scan hits add <code>source</code>, <code>line</code>, <code>column</code>, <code>duplicate</code>, <code>score</code>, <code>confidence</code>, <code>signals</code> and <code>sha256</code>. Track results are <code>{track, validation}</code>; EMV results are <code>{tags, summary, bytes}</code>. One input gives one object, several give an array, and <code>jsonl</code> gives one object per line.</p>
+<h3 id="s7/7-5-scheme-table"><span class="h-num">7.5</span><span class="h-text">Scheme table</span></h3>
+<div class="table-wrap"><table><thead><tr><th>Scheme</th><th>IIN ranges</th><th>Lengths</th></tr></thead><tbody><tr><td>Visa</td><td>4</td><td>13, 16, 18, 19</td></tr><tr><td>Visa Electron</td><td>4026, 417500, 4508, 4844, 4913, 4917</td><td>16</td></tr><tr><td>Dankort</td><td>5019, 4571 (Visa/Dankort co-badge)</td><td>16</td></tr><tr><td>Mastercard</td><td>2221-2720, 51-55</td><td>16</td></tr><tr><td>Maestro</td><td>5018, 5020, 5038, 5893, 6304, 6761, 6762, 6763; catch-all 50, 56-69</td><td>12-19</td></tr><tr><td>Maestro UK</td><td>6759, 676770, 676774</td><td>12-19</td></tr><tr><td>American Express</td><td>34, 37</td><td>15</td></tr><tr><td>Diners Club International</td><td>300-305, 3095, 36, 38-39</td><td>14-19</td></tr><tr><td>Discover</td><td>6011, 644-649, 65</td><td>16-19</td></tr><tr><td>Discover (UnionPay co-processed)</td><td>622126-622925</td><td>16-19</td></tr><tr><td>JCB</td><td>3528-3589</td><td>16-19</td></tr><tr><td>China UnionPay</td><td>62, 81</td><td>14-19</td></tr><tr><td>China T-Union</td><td>31</td><td>19</td></tr><tr><td>UATP</td><td>1</td><td>15</td></tr><tr><td>Mir</td><td>2200-2204</td><td>16-19</td></tr><tr><td>BORICA</td><td>2205</td><td>16</td></tr><tr><td>Troy</td><td>9792 and 65xxxx co-badges</td><td>16</td></tr><tr><td>RuPay</td><td>60, 6521-6522, 81, 82, 508, 353, 356</td><td>16</td></tr><tr><td>Verve</td><td>506099-506198, 507865-507964, 650002-650027</td><td>16, 18, 19</td></tr><tr><td>Elo</td><td>27 ranges from 401178 to 655058</td><td>16</td></tr><tr><td>Hipercard</td><td>606282</td><td>13, 16, 19</td></tr><tr><td>Hiper</td><td>637095, 637568, 637599, 637609, 637612, 63737423, 63743358</td><td>16</td></tr><tr><td>Naranja</td><td>402918, 527572, 589562</td><td>16</td></tr><tr><td>InterPayment</td><td>636</td><td>16-19</td></tr><tr><td>InstaPayment</td><td>637-639</td><td>16</td></tr><tr><td>UkrCard</td><td>6040-6049</td><td>16-19</td></tr><tr><td>NPS Pridnestrovie</td><td>6054740-6054744</td><td>16</td></tr><tr><td>LankaPay</td><td>357111</td><td>16</td></tr><tr><td>UzCard</td><td>8600, 5614</td><td>16</td></tr><tr><td>Humo</td><td>9860</td><td>16</td></tr><tr><td>Napas</td><td>9704</td><td>16, 19</td></tr><tr><td>GPN (Indonesia)</td><td>1946</td><td>16, 18, 19</td></tr><tr><td>Defunct: Bankcard, Diners Club enRoute (no Luhn), JCB legacy, Laser, Solo, Switch</td><td>see <code>--list-schemes</code></td><td></td></tr></tbody></table></div>
+<h3 id="s7/7-6-service-code-iso-iec-7813"><span class="h-num">7.6</span><span class="h-text">Service code (ISO/IEC 7813)</span></h3>
+<div class="table-wrap"><table><thead><tr><th>Digit</th><th>Value</th><th>Meaning</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>international interchange OK</td></tr><tr><td>1</td><td>2</td><td>international interchange, use chip where feasible</td></tr><tr><td>1</td><td>5</td><td>national interchange only, except under bilateral agreement</td></tr><tr><td>1</td><td>6</td><td>national interchange only, use chip where feasible</td></tr><tr><td>1</td><td>7</td><td>no interchange except under bilateral agreement (closed loop)</td></tr><tr><td>1</td><td>9</td><td>test</td></tr><tr><td>2</td><td>0</td><td>normal authorisation</td></tr><tr><td>2</td><td>2</td><td>contact issuer via online means</td></tr><tr><td>2</td><td>4</td><td>contact issuer via online means, except under bilateral agreement</td></tr><tr><td>3</td><td>0</td><td>no restrictions, PIN required</td></tr><tr><td>3</td><td>1</td><td>no restrictions</td></tr><tr><td>3</td><td>2</td><td>goods and services only (no cash)</td></tr><tr><td>3</td><td>3</td><td>ATM only, PIN required</td></tr><tr><td>3</td><td>4</td><td>cash only</td></tr><tr><td>3</td><td>5</td><td>goods and services only, PIN required</td></tr><tr><td>3</td><td>6</td><td>no restrictions, use PIN where feasible</td></tr><tr><td>3</td><td>7</td><td>goods and services only, use PIN where feasible</td></tr></tbody></table></div>
+<h3 id="s7/7-7-emv-tags-and-aids"><span class="h-num">7.7</span><span class="h-text">EMV tags and AIDs</span></h3>
+<p>The decoder names more than a hundred tags and decodes the following beyond hex: 5A, 57, 9F6B (PAN and track 2 equivalent), 5F24, 5F25, 9A (dates), 5F34, 5F20, 50, 9F12, 5F28, 9F1A (issuer and terminal country), 5F2A, 9F42 (currency), 5F30 (service code), 82 (AIP), 8E (CVM list with conditions and failure rules), 94 (AFL), 95 and 9F0D/0E/0F (TVR bits), 9B (TSI), 9F07 (AUC), 9F27 (CID), 9F02 and 9F03 (amounts), 9C, 9F35, 9F39, 9F33, 9F34, and the DOL tag lists 8C, 8D, 9F38, 9F49, 97. AIDs are mapped by longest prefix for Visa (credit/debit, Electron, V PAY, Interlink, Plus, US common debit), Mastercard (credit/debit, Maestro, Cirrus, US Maestro, Maestro UK, Solo), American Express, Discover (D-PAS, US common debit, ZIP), JCB, UnionPay (debit, credit, quasi-credit, e-cash), Mir, RuPay, Troy, Cartes Bancaires, girocard, PagoBANCOMAT, Dankort, Interac, eftpos, DNA, Elo and Verve.</p>
+<h3 id="s7/7-8-test-numbers-recognised"><span class="h-num">7.8</span><span class="h-text">Test numbers recognised</span></h3>
+<p>About seventy numbers published by the schemes and by Stripe, Braintree, Adyen, Worldpay, Mastercard and Visa for sandbox use. They validate normally, are labelled in text and JSON output, and lower the scan confidence score.</p>
+</section>
+<section class="guide-section" id="s8" aria-labelledby="s8-title" hidden><h2 class="section-title" id="s8-title"><span class="num-tile" aria-hidden="true">08</span><span>Troubleshooting</span></h2>
+<div class="table-wrap"><table><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td><code>[-] Invalid PAN (American Express numbers are 15 digits, not 16)</code></td><td>the length rule of the scheme is applied with <code>-i</code></td><td>drop <code>-i</code>, or add <code>--ignore-length</code> if the data source is known to pad numbers</td></tr><tr><td>A number is &quot;valid&quot; although it is obviously made up</td><td>without <code>-i</code> only Luhn is checked</td><td>add <code>-i</code>; read the test number and look-alike lines</td></tr><tr><td>Generation refuses with &quot;raise --max&quot;</td><td>more than seven unknown digits</td><td>narrow with <code>-b</code>, fix more digits, or raise <code>--max</code> deliberately</td></tr><tr><td>Generation lists many Maestro candidates</td><td>Maestro 50 and 56-69 are catch-all ranges</td><td>add <code>--no-catch-all</code> or <code>-b</code></td></tr><tr><td><code>cannot load BIN database ...: No such file</code> with <code>--bin-db auto</code></td><td>the list has not been downloaded</td><td>run once with <code>--update-bin-db</code></td></tr><tr><td><code>Lookup: ... HTTP 429</code></td><td>the public service is rate limited</td><td>wait, or switch to the offline list</td></tr><tr><td><code>Lookup: ... URLError</code> or time-out</td><td>no network or a proxy in the way</td><td>check connectivity; the validation itself is unaffected</td></tr><tr><td>PowerShell: &quot;running scripts is disabled&quot;</td><td>execution policy</td><td><code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code></td></tr><tr><td>PowerShell: <code>-Exclude</code> &quot;specified more than once&quot;</td><td>PowerShell takes one array per option</td><td><code>-Exclude '*.bak','sub'</code> or <code>-Exclude '*.bak,sub'</code></td></tr><tr><td>PowerShell hangs in a scheduled task</td><td>stdin is an open pipe and the host waits for end of file</td><td>redirect stdin from <code>NUL</code> or <code>/dev/null</code></td></tr><tr><td>Scan finds nothing in a PDF</td><td>text is fragmented or stored in an encoded font</td><td>export the PDF to text with a dedicated tool and scan that</td></tr><tr><td>Scan reports digits from inside a binary file</td><td>binaries are scanned as text on purpose</td><td>review the signals; use <code>--min-score</code> or <code>--exclude</code></td></tr><tr><td>Non-ASCII bank names look garbled on Windows PowerShell 5.1</td><td>console code page</td><td>run <code>chcp 65001</code> first or write the output to a file</td></tr><tr><td>EMV: &quot;constructed tag without valid TLV content&quot;</td><td>a template contains proprietary data or the dump is truncated</td><td>the tag is shown as hex; check the dump length</td></tr></tbody></table></div>
+</section>
+<section class="guide-section" id="s9" aria-labelledby="s9-title" hidden><h2 class="section-title" id="s9-title"><span class="num-tile" aria-hidden="true">09</span><span>FAQ</span></h2><div class="faq-tools"><div class="faq-search-row"><svg class="faq-glass" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12.8 12.8L17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input id="faq-search" type="search" autocomplete="off" spellcheck="false" placeholder="Search the FAQ" aria-label="Search the FAQ"><span id="faq-count" class="faq-count" aria-live="polite"></span></div><div class="faq-options"><label><input type="checkbox" id="faq-opt-all" checked> Match all words</label><label><input type="checkbox" id="faq-opt-answers" checked> Search answers too</label><label><input type="checkbox" id="faq-opt-whole"> Whole words only</label><button type="button" id="faq-expand" class="faq-expand" aria-expanded="false">Expand all</button></div><div class="faq-chips" role="group"><button type="button" class="faq-chip is-active" data-cat="all" aria-pressed="true">All</button><button type="button" class="faq-chip" data-cat="general" aria-pressed="false">General</button><button type="button" class="faq-chip" data-cat="usage" aria-pressed="false">Usage</button><button type="button" class="faq-chip" data-cat="security" aria-pressed="false">Security</button><button type="button" class="faq-chip" data-cat="output" aria-pressed="false">Output</button><button type="button" class="faq-chip" data-cat="errors" aria-pressed="false">Errors</button></div></div><p id="faq-none" class="faq-none" hidden>No entries match.</p>
+<details class="faq" id="faq-1" data-cat="general"><summary><span class="faq-q">Does a valid result mean the card exists or is active?</span><span class="faq-cat">General</span></summary><div class="faq-body">
+<p>No. The Luhn check and the IIN table only say that the number is well formed and that the prefix belongs to a network. Only the issuer can say whether an account exists.</p>
+</div></details>
+<details class="faq" id="faq-2" data-cat="usage"><summary><span class="faq-q">What is the difference between validation with and without <code>-i</code>?</span><span class="faq-cat">Usage</span></summary><div class="faq-body">
+<p>Without <code>-i</code> the number only has to pass the Luhn check, as in version 0.8. With <code>-i</code> the IIN must be in the scheme table and the length must fit the scheme. Generation and scans always apply that filter unless <code>--no-iin</code> is given.</p>
+</div></details>
+<details class="faq" id="faq-3" data-cat="usage"><summary><span class="faq-q">Why does <code>???2109545565554</code> now return 41 numbers instead of 21?</span><span class="faq-cat">Usage</span></summary><div class="faq-body">
+<p>The scheme table grew (Mastercard 2-series, UnionPay, RuPay, Maestro, UkrCard and more) and 16-digit American Express candidates disappeared because Amex numbers have 15 digits.</p>
+</div></details>
+<details class="faq" id="faq-4" data-cat="usage"><summary><span class="faq-q">Which digits can I replace with <code>?</code></span><span class="faq-cat">Usage</span></summary><div class="faq-body">
+<p>Any, including the check digit and the IIN. One unknown digit is solved directly from the Luhn formula; the others are enumerated, with prefixes pruned by the scheme table.</p>
+</div></details>
+<details class="faq" id="faq-5" data-cat="general"><summary><span class="faq-q">How accurate is the scheme table?</span><span class="faq-cat">General</span></summary><div class="faq-body">
+<p>It is compiled from ISO/IEC 7812, the schemes' publications and the widely used open-source range lists, and cross-checked against the braintree project. It identifies the network, not the bank. Overlaps are resolved by the rules in <a href="#s3/3.4">3.4</a> and every alternative is still printed.</p>
+</div></details>
+<details class="faq" id="faq-6" data-cat="usage"><summary><span class="faq-q">How do I see the issuing bank?</span><span class="faq-cat">Usage</span></summary><div class="faq-body">
+<p>Use <code>--bin-db auto</code> after one <code>--update-bin-db</code> (offline, about 25 MB), or <code>--lookup</code> (online, IIN only). Both fill the issuer line in text output and the issuer field in JSON and CSV.</p>
+</div></details>
+<details class="faq" id="faq-7" data-cat="security"><summary><span class="faq-q">Is anything sent over the network?</span><span class="faq-cat">Security</span></summary><div class="faq-body">
+<p>Only when you ask for it. <code>--update-bin-db</code> downloads one file from GitHub. <code>--lookup</code> sends the first eight (then six) digits of each distinct IIN to the service in <code>--lookup-url</code>. Nothing else leaves the machine; full PANs never do.</p>
+</div></details>
+<details class="faq" id="faq-8" data-cat="usage"><summary><span class="faq-q">Which files can <code>--scan</code> read?</span><span class="faq-cat">Usage</span></summary><div class="faq-body">
+<p>Plain text in UTF-8, UTF-16 (with or without BOM) and single-byte encodings, ZIP and Office archives (DOCX, XLSX, PPTX, ODT, ODS, nested up to three levels), gzip files, PDFs (best effort), and any other file as raw text. Folders are walked recursively unless <code>--no-recursive</code> is given.</p>
+</div></details>
+<details class="faq" id="faq-9" data-cat="output"><summary><span class="faq-q">What do HIGH, MEDIUM and LOW mean?</span><span class="faq-cat">Output</span></summary><div class="faq-body">
+<p>A confidence score from 0 to 100 built from the signals printed under each hit (specific IIN, grouped digits, nearby card keywords, nearby expiry, test numbers, look-alikes, repeated digits). HIGH is 70 or more, MEDIUM 45 or more. The score orders your review; it is not a verdict.</p>
+</div></details>
+<details class="faq" id="faq-10" data-cat="output"><summary><span class="faq-q">Why is 4111111111111111 reported with a LOW score?</span><span class="faq-cat">Output</span></summary><div class="faq-body">
+<p>It is the best known test number and consists of repeated digits, so two signals lower the score. It is still a well formed Visa number, which is why it appears at all.</p>
+</div></details>
+<details class="faq" id="faq-11" data-cat="output"><summary><span class="faq-q">Can I get the results as CSV or JSON?</span><span class="faq-cat">Output</span></summary><div class="faq-body">
+<p>Yes: <code>--format csv</code> and <code>--format jsonl</code> for scans, <code>-j</code> or <code>--format json</code> everywhere. CSV rows include the SHA-256 of the source file so reviewed files can be identified later.</p>
+</div></details>
+<details class="faq" id="faq-12" data-cat="security"><summary><span class="faq-q">Which masking should I use in a report?</span><span class="faq-cat">Security</span></summary><div class="faq-body">
+<p><code>--mask</code> (first six, last four) is accepted everywhere. <code>--mask-style 8-4</code> is permitted by PCI DSS v4 for PANs of 16 digits or more and keeps the full eight digit IIN visible. <code>last4</code> and <code>full</code> are for documents that leave the organisation.</p>
+</div></details>
+<details class="faq" id="faq-13" data-cat="security"><summary><span class="faq-q">What is the warning about sensitive authentication data?</span><span class="faq-cat">Security</span></summary><div class="faq-body">
+<p>Full track data, CVV values and PIN data must not be stored after authorisation (PCI DSS v4 requirement 3.3.1). The tool prints the warning whenever it decodes track or chip data and flags expiry or CVV-like values next to a PAN in scans, because their presence turns a data finding into a compliance finding.</p>
+</div></details>
+<details class="faq" id="faq-14" data-cat="usage"><summary><span class="faq-q">What does the EMV decoder need as input?</span><span class="faq-cat">Usage</span></summary><div class="faq-body">
+<p>A hex string of BER-TLV data: a record read from the card, a GET PROCESSING OPTIONS or GENERATE AC response, or a tag dump from a terminal log. Spaces, colons and <code>0x</code> prefixes are ignored; <code>@file</code> reads the hex from a file.</p>
+</div></details>
+<details class="faq" id="faq-15" data-cat="output"><summary><span class="faq-q">A 15-digit number starting with 35 is reported as a probable IMEI. Why?</span><span class="faq-cat">Output</span></summary><div class="faq-body">
+<p>IMEIs are 15-digit Luhn numbers whose first eight digits (the TAC) start with 35, 86, 01 and a few other prefixes. JCB numbers start with 3528 to 3589 but have 16 to 19 digits, so a 15-digit 35 number is far more likely to be a phone identifier. SIM ICCIDs (18 to 20 digits starting with 89) are labelled the same way.</p>
+</div></details>
+<details class="faq" id="faq-16" data-cat="usage"><summary><span class="faq-q">Can I add my own ranges without editing the code?</span><span class="faq-cat">Usage</span></summary><div class="faq-body">
+<p>Yes, with <code>--iin-table my.json</code> (see <a class="xref" href="#s5/5-9-uc9-extend-or-override-the-scheme-table">UC9</a>). Keys that match a built-in scheme override it, other keys are appended, and <code>&quot;replace&quot;: true</code> starts from an empty table.</p>
+</div></details>
+<details class="faq" id="faq-17" data-cat="errors"><summary><span class="faq-q">Why does the PowerShell script need <code>&lt; NUL</code> in scheduled tasks?</span><span class="faq-cat">Errors</span></summary><div class="faq-body">
+<p>When stdin is redirected to an open pipe, the PowerShell host feeds it to the script as pipeline input and waits for end of file before the script runs. Interactive use is not affected. Redirect stdin from <code>NUL</code> (Windows) or <code>/dev/null</code> unless you pipe numbers in.</p>
+</div></details>
+<details class="faq" id="faq-18" data-cat="errors"><summary><span class="faq-q">The outputs of the Python and PowerShell scripts differ slightly. Is that expected?</span><span class="faq-cat">Errors</span></summary><div class="faq-body">
+<p>They are meant to be identical and the test suites compare them. Report a difference with both outputs; the usual cause is a different scheme table file or BIN list on the two machines.</p>
+</div></details>
+<details class="faq" id="faq-19" data-cat="general"><summary><span class="faq-q">How do I run the tests?</span><span class="faq-cat">General</span></summary><div class="faq-body">
+<p><code>python3 -m unittest discover -s tests</code> and <code>powershell -ExecutionPolicy Bypass -File tests\gLuhn.Tests.ps1</code>. The PowerShell suite starts a small mock lookup server with Python when it finds one, and skips those checks otherwise.</p>
+</div></details>
+<details class="faq" id="faq-20" data-cat="security"><summary><span class="faq-q">Where do the test numbers come from, and is listing them a problem?</span><span class="faq-cat">Security</span></summary><div class="faq-body">
+<p>They are published by the card schemes and payment providers for sandbox use and are not linked to accounts. Recognising them keeps developer fixtures out of findings.</p>
+<div class="callout callout-info"><div class="callout-label">Attribution</div><div class="callout-text"><p>gLuhn is written by @drgfragkos. You may modify, reuse and distribute the code freely as long as it is referenced back to the author with the line &quot;..based on gLuhn.py by @drgfragkos&quot;. The optional BIN list is the open binlist-data project; the optional generated range table comes from the MIT licensed braintree credit-card-type project.</p></div></div>
+</div></details>
+</section>
+</main>
+<aside class="onpage" id="onpage" aria-label="On this page"><div class="onpage-title">On this page</div><ol id="onpage-list"></ol></aside>
+</div>
+<button type="button" id="to-top" aria-label="Back to top" title="Back to top"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false"><path d="M10 16V4M4 10l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<script type="application/json" id="guide-strings">{"lang":"en","dir":"ltr","subtitle":"User guide","groups":[{"name":"Learn","sections":[1,2,3]},{"name":"Apply","sections":[4,5,6]},{"name":"Support","sections":[7,8,9]}],"skipSections":["Contents"],"navSubsections":[5],"countSubsections":[5],"callouts":{"note":"Note","attention":"Attention","info":"Attribution"},"codeLabels":{"powershell":"PowerShell","bash":"Bash","python":"Python","text":"Text","json":"JSON","csv":"CSV","cmd":"Command Prompt","console":"Console"},"flowBadges":{"start":"Start","step":"Step","see":"See","decide":"Decide","end":"End"},"onThisPage":"On this page","searchPlaceholder":"Search the FAQ","matchAll":"Match all words","searchAnswers":"Search answers too","wholeWords":"Whole words only","expandAll":"Expand all","collapseAll":"Collapse all","all":"All","noMatches":"No entries match.","resultCounter":"{shown} of {total}","copy":"Copy","copied":"Copied","showMore":"Show {n} more lines","showFewer":"Show fewer lines","backToTop":"Back to top","keyboardHint":"Press / to search the FAQ","categories":{"general":"General","usage":"Usage","output":"Output","errors":"Errors","security":"Security"},"emblem":"\u003csvg viewBox=\"0 0 210 36\" width=\"210\" height=\"36\" role=\"img\" aria-label=\"Markdown in, one HTML file out\"\u003e\u003cg fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\"\u003e\u003crect x=\"3\" y=\"6\" width=\"48\" height=\"24\" rx=\"4\"/\u003e\u003cpath d=\"M10 13h26M10 18h34M10 23h20\"/\u003e\u003cpath d=\"M58 18h32\"/\u003e\u003cpath d=\"M85 13l6 5-6 5\"/\u003e\u003crect x=\"98\" y=\"3\" width=\"40\" height=\"30\" rx=\"4\"/\u003e\u003cpath d=\"M105 11h10M105 17h26M105 23h22\"/\u003e\u003cpath d=\"M145 18h32\"/\u003e\u003cpath d=\"M172 13l6 5-6 5\"/\u003e\u003crect x=\"185\" y=\"6\" width=\"22\" height=\"24\" rx=\"4\"/\u003e\u003cpath d=\"M190 15l4 4 7-8\"/\u003e\u003c/g\u003e\u003c/svg\u003e","autolink":{"pattern":"\\bUC(\\d+)\\b","target":"5.{1}"}}</script>
+<script type="application/json" id="guide-toc">[{"id":"s1","num":"1","title":"Overview","items":[{"id":"s1/1-1-two-implementations-one-behaviour","num":"1.1","title":"Two implementations, one behaviour"},{"id":"s1/1-2-what-the-tool-is-not","num":"1.2","title":"What the tool is not"}]},{"id":"s2","num":"2","title":"Quick start","items":[{"id":"s2/2-1-validate-and-identify-one-number","num":"2.1","title":"Validate and identify one number"},{"id":"s2/2-2-complete-a-partially-known-number","num":"2.2","title":"Complete a partially known number"},{"id":"s2/2-3-scan-a-folder-and-write-a-masked-report","num":"2.3","title":"Scan a folder and write a masked report"}]},{"id":"s3","num":"3","title":"Concepts","items":[{"id":"s3/3-1-anatomy-of-a-pan","num":"3.1","title":"Anatomy of a PAN"},{"id":"s3/3-2-major-industry-identifier","num":"3.2","title":"Major Industry Identifier"},{"id":"s3/3-3-the-luhn-check","num":"3.3","title":"The Luhn check"},{"id":"s3/3-4-schemes-ranges-and-precedence","num":"3.4","title":"Schemes, ranges and precedence"},{"id":"s3/3-5-validation-levels","num":"3.5","title":"Validation levels"},{"id":"s3/3-6-confidence-score-in-scan-results","num":"3.6","title":"Confidence score in scan results"},{"id":"s3/3-7-sensitive-authentication-data","num":"3.7","title":"Sensitive authentication data"}]},{"id":"s4","num":"4","title":"Installation and files","items":[{"id":"s4/4-1-python","num":"4.1","title":"Python"},{"id":"s4/4-2-powershell","num":"4.2","title":"PowerShell"},{"id":"s4/4-3-optional-data","num":"4.3","title":"Optional data"},{"id":"s4/4-4-files-in-the-repository","num":"4.4","title":"Files in the repository"}]},{"id":"s5","num":"5","title":"Use cases","items":[{"id":"s5/5-1-uc1-validate-and-identify-a-number","num":"5.1","title":"UC1: Validate and identify a number"},{"id":"s5/5-2-uc2-complete-a-partially-known-number","num":"5.2","title":"UC2: Complete a partially known number"},{"id":"s5/5-3-uc3-find-the-issuing-bank-offline","num":"5.3","title":"UC3: Find the issuing bank offline"},{"id":"s5/5-4-uc4-online-iin-lookup","num":"5.4","title":"UC4: Online IIN lookup"},{"id":"s5/5-5-uc5-scan-a-folder-for-card-numbers","num":"5.5","title":"UC5: Scan a folder for card numbers"},{"id":"s5/5-6-uc6-produce-evidence-for-an-assessment","num":"5.6","title":"UC6: Produce evidence for an assessment"},{"id":"s5/5-7-uc7-decode-track-data","num":"5.7","title":"UC7: Decode track data"},{"id":"s5/5-8-uc8-decode-an-emv-chip-dump","num":"5.8","title":"UC8: Decode an EMV chip dump"},{"id":"s5/5-9-uc9-extend-or-override-the-scheme-table","num":"5.9","title":"UC9: Extend or override the scheme table"},{"id":"s5/5-10-uc10-mask-output-for-reports","num":"5.10","title":"UC10: Mask output for reports"}]},{"id":"s6","num":"6","title":"Playbook","items":[]},{"id":"s7","num":"7","title":"Reference","items":[{"id":"s7/7-1-options","num":"7.1","title":"Options"},{"id":"s7/7-2-exit-codes","num":"7.2","title":"Exit codes"},{"id":"s7/7-3-text-output-fields","num":"7.3","title":"Text output fields"},{"id":"s7/7-4-json-fields","num":"7.4","title":"JSON fields"},{"id":"s7/7-5-scheme-table","num":"7.5","title":"Scheme table"},{"id":"s7/7-6-service-code-iso-iec-7813","num":"7.6","title":"Service code (ISO/IEC 7813)"},{"id":"s7/7-7-emv-tags-and-aids","num":"7.7","title":"EMV tags and AIDs"},{"id":"s7/7-8-test-numbers-recognised","num":"7.8","title":"Test numbers recognised"}]},{"id":"s8","num":"8","title":"Troubleshooting","items":[]},{"id":"s9","num":"9","title":"FAQ","items":[]}]</script>
+<script>
+(function () {
+  'use strict';
+  var S = JSON.parse(document.getElementById('guide-strings').textContent);
+  var TOC = JSON.parse(document.getElementById('guide-toc').textContent);
+  var body = document.body;
+  var docEl = document.documentElement;
+  var guideTitle = body.getAttribute('data-guide-title') || document.title;
+  var firstId = body.getAttribute('data-first');
+  var faqSectionId = body.getAttribute('data-faq') || '';
+  var isRtl = (docEl.getAttribute('dir') === 'rtl');
+  var sections = {};
+  TOC.forEach(function (s) { sections[s.id] = s; });
+
+  var reading = document.getElementById('reading');
+  var onpage = document.getElementById('onpage');
+  var onpageList = document.getElementById('onpage-list');
+  var toTop = document.getElementById('to-top');
+
+  var current = '';
+  var landing = null;        /* { id, y } after navigating to a subsection */
+  var LANDING_TOLERANCE = 40;
+  var TOP_THRESHOLD = 600;
+
+  function fmt(str, map) {
+    return String(str || '').replace(/\{(\w+)\}/g, function (m, k) {
+      return Object.prototype.hasOwnProperty.call(map, k) ? String(map[k]) : m;
+    });
+  }
+  function slug(t) {
+    return String(t).toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+  function decodeHash(h) {
+    h = String(h || '').replace(/^#/, '');
+    try { h = decodeURIComponent(h); } catch (e) { /* keep raw */ }
+    return h;
+  }
+  function parseHash(h) {
+    h = decodeHash(h);
+    if (!h) { return { section: '', anchor: '' }; }
+    var i = h.indexOf('/');
+    if (i < 0) { return { section: h, anchor: '' }; }
+    return { section: h.slice(0, i), anchor: h.slice(i + 1) };
+  }
+  function toArray(list) { return Array.prototype.slice.call(list || []); }
+  function closest(el, sel) {
+    while (el && el.nodeType === 1) {
+      if (el.matches(sel)) { return el; }
+      el = el.parentNode;
+    }
+    return null;
+  }
+  function topOffset() { return 8; }
+
+  /* ---------------- routing ---------------- */
+  function findAnchor(sec, anchor) {
+    var el = document.getElementById(sec.id + '/' + anchor);
+    if (el) { return el; }
+    var want = slug(anchor);
+    for (var i = 0; i < sec.items.length; i++) {
+      var it = sec.items[i];
+      if (it.num === anchor || it.id === sec.id + '/' + want || it.id.indexOf(sec.id + '/' + want + '-') === 0 || slug(it.title) === want) {
+        return document.getElementById(it.id);
+      }
+    }
+    return document.getElementById(anchor);
+  }
+
+  function buildOnPage(sec) {
+    if (!onpage || !onpageList) { return; }
+    onpageList.innerHTML = '';
+    if (!sec.items.length) { onpage.setAttribute('hidden', ''); return; }
+    onpage.removeAttribute('hidden');
+    sec.items.forEach(function (it) {
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = '#' + it.id;
+      a.setAttribute('data-id', it.id);
+      if (it.num) {
+        var n = document.createElement('span');
+        n.className = 'onpage-num';
+        n.textContent = it.num;
+        a.appendChild(n);
+      }
+      var t = document.createElement('span');
+      t.textContent = it.title;
+      a.appendChild(t);
+      li.appendChild(a);
+      onpageList.appendChild(li);
+    });
+  }
+
+  function setCurrentHeading(id) {
+    var links = toArray(document.querySelectorAll('.onpage a[data-id], .rail-sub a[data-id]'));
+    links.forEach(function (a) {
+      var on = (id && a.getAttribute('data-id') === id);
+      a.classList.toggle('is-current', !!on);
+      if (on) { a.setAttribute('aria-current', 'true'); } else { a.removeAttribute('aria-current'); }
+    });
+  }
+
+  function route() {
+    var h = parseHash(location.hash);
+    var id = h.section;
+    if (!sections[id]) { id = firstId; }
+    var sec = sections[id];
+    if (!sec) { return; }
+    TOC.forEach(function (s) {
+      var el = document.getElementById(s.id);
+      if (!el) { return; }
+      if (s.id === id) { el.removeAttribute('hidden'); } else { el.setAttribute('hidden', ''); }
+    });
+    current = id;
+    document.title = sec.title + ' | ' + guideTitle;
+    toArray(document.querySelectorAll('.rail-link')).forEach(function (a) {
+      var on = (a.getAttribute('data-section') === id);
+      a.classList.toggle('is-active', on);
+      if (on) { a.setAttribute('aria-current', 'page'); } else { a.removeAttribute('aria-current'); }
+    });
+    buildOnPage(sec);
+    var target = h.anchor ? findAnchor(sec, h.anchor) : null;
+    if (target) {
+      var y = Math.round(target.getBoundingClientRect().top + window.pageYOffset - topOffset());
+      window.scrollTo(0, Math.max(0, y));
+      landing = { id: target.id, y: window.pageYOffset };
+      setCurrentHeading(target.id);
+    } else {
+      window.scrollTo(0, 0);
+      landing = null;
+      spy();
+    }
+    positionToTop();
+    updateToTop();
+  }
+
+  /* ---------------- scroll spy ---------------- */
+  function headingsOf(sec) {
+    return sec.items.map(function (it) { return document.getElementById(it.id); }).filter(function (el) { return !!el; });
+  }
+  function spy() {
+    var sec = sections[current];
+    if (!sec) { return; }
+    var hs = headingsOf(sec);
+    if (!hs.length) { setCurrentHeading(''); return; }
+    var y = window.pageYOffset;
+    if (landing) {
+      if (Math.abs(y - landing.y) <= LANDING_TOLERANCE) { setCurrentHeading(landing.id); return; }
+      landing = null;
+    }
+    var atEnd = (window.innerHeight + y) >= (docEl.scrollHeight - 2);
+    var cur = '';
+    if (atEnd) {
+      cur = hs[hs.length - 1].id;
+    } else {
+      var off = topOffset() + 4;
+      for (var i = 0; i < hs.length; i++) {
+        if (hs[i].getBoundingClientRect().top <= off) { cur = hs[i].id; }
+      }
+    }
+    setCurrentHeading(cur);
+  }
+
+  /* ---------------- back to top ---------------- */
+  function positionToTop() {
+    if (!toTop || !reading) { return; }
+    var r = reading.getBoundingClientRect();
+    var size = 44, gap = 6, vw = docEl.clientWidth, fits = false;
+    if (!isRtl) {
+      var left = r.right + gap;
+      fits = (left + size) <= (vw - 8);
+      if (fits) { toTop.style.left = left + 'px'; toTop.style.right = 'auto'; }
+    } else {
+      var right = vw - r.left + gap;
+      fits = (right + size) <= (vw - 8);
+      if (fits) { toTop.style.right = right + 'px'; toTop.style.left = 'auto'; }
+    }
+    if (!fits) {
+      if (!isRtl) { toTop.style.right = '16px'; toTop.style.left = 'auto'; }
+      else { toTop.style.left = '16px'; toTop.style.right = 'auto'; }
+    }
+  }
+  function updateToTop() {
+    if (!toTop) { return; }
+    toTop.classList.toggle('is-visible', window.pageYOffset > TOP_THRESHOLD);
+  }
+  function scrollToTopAnimated() {
+    var start = window.pageYOffset;
+    if (start <= 0) { return; }
+    var duration = Math.min(900, 300 + start * 0.12);
+    var t0 = null;
+    function step(ts) {
+      if (t0 === null) { t0 = ts; }
+      var p = Math.min(1, (ts - t0) / duration);
+      var e = 1 - Math.pow(1 - p, 3);
+      window.scrollTo(0, Math.round(start * (1 - e)));
+      if (p < 1) { window.requestAnimationFrame(step); }
+    }
+    window.requestAnimationFrame(step);
+  }
+
+  /* ---------------- clipboard ---------------- */
+  function copyFallback(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '-9999px';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyText(text, done) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(copyFallback(text)); });
+    } else {
+      done(copyFallback(text));
+    }
+  }
+
+  /* ---------------- FAQ ---------------- */
+  var faq = null;
+  function initFaq() {
+    var input = document.getElementById('faq-search');
+    if (!input) { return; }
+    faq = {
+      input: input,
+      count: document.getElementById('faq-count'),
+      none: document.getElementById('faq-none'),
+      expand: document.getElementById('faq-expand'),
+      optAll: document.getElementById('faq-opt-all'),
+      optAnswers: document.getElementById('faq-opt-answers'),
+      optWhole: document.getElementById('faq-opt-whole'),
+      chips: toArray(document.querySelectorAll('.faq-chip')),
+      cat: 'all',
+      entries: toArray(document.querySelectorAll('details.faq')).map(function (d) {
+        var sum = d.querySelector('summary');
+        var bodyEl = d.querySelector('.faq-body');
+        return { el: d, sum: sum, body: bodyEl, sumHtml: sum.innerHTML, bodyHtml: bodyEl ? bodyEl.innerHTML : '', marked: false, autoOpened: false, cat: d.getAttribute('data-cat') || '' };
+      })
+    };
+    input.addEventListener('input', applyFaq);
+    [faq.optAll, faq.optAnswers, faq.optWhole].forEach(function (cb) { if (cb) { cb.addEventListener('change', applyFaq); } });
+    faq.chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        faq.cat = chip.getAttribute('data-cat') || 'all';
+        faq.chips.forEach(function (c) {
+          var on = (c === chip);
+          c.classList.toggle('is-active', on);
+          c.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        applyFaq();
+      });
+    });
+    if (faq.expand) {
+      faq.expand.addEventListener('click', function () {
+        var v = visibleEntries();
+        var all = allOpen(v);
+        v.forEach(function (e) { e.el.open = !all; e.autoOpened = false; });
+        updateExpandLabel();
+      });
+    }
+    /* toggle does not bubble: listen in the capture phase */
+    document.addEventListener('toggle', function (ev) {
+      var t = ev.target;
+      if (t && t.classList && t.classList.contains('faq')) { updateExpandLabel(); }
+    }, true);
+    applyFaq();
+  }
+  function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function wordRegex(words, whole) {
+    var alt = words.map(escapeRe).join('|');
+    var src = whole ? '(?<![\\p{L}\\p{N}_])(?:' + alt + ')(?![\\p{L}\\p{N}_])' : '(?:' + alt + ')';
+    try { return new RegExp(src, 'giu'); }
+    catch (e) { return new RegExp(whole ? '\\b(?:' + alt + ')\\b' : '(?:' + alt + ')', 'gi'); }
+  }
+  function visibleEntries() { return faq ? faq.entries.filter(function (e) { return !e.el.hidden; }) : []; }
+  function allOpen(list) { return list.length > 0 && list.every(function (e) { return e.el.open; }); }
+  function updateExpandLabel() {
+    if (!faq || !faq.expand) { return; }
+    var v = visibleEntries();
+    var all = allOpen(v);
+    faq.expand.textContent = all ? S.collapseAll : S.expandAll;
+    faq.expand.setAttribute('aria-expanded', all ? 'true' : 'false');
+    faq.expand.disabled = (v.length === 0);
+  }
+  function highlight(root, re) {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+    var nodes = [];
+    while (walker.nextNode()) { nodes.push(walker.currentNode); }
+    nodes.forEach(function (node) {
+      var text = node.nodeValue;
+      re.lastIndex = 0;
+      if (!re.test(text)) { return; }
+      re.lastIndex = 0;
+      var frag = document.createDocumentFragment();
+      var last = 0, m;
+      while ((m = re.exec(text)) !== null) {
+        if (m.index > last) { frag.appendChild(document.createTextNode(text.slice(last, m.index))); }
+        var mark = document.createElement('mark');
+        mark.textContent = m[0];
+        frag.appendChild(mark);
+        last = m.index + m[0].length;
+        if (m[0].length === 0) { re.lastIndex++; }
+      }
+      if (last < text.length) { frag.appendChild(document.createTextNode(text.slice(last))); }
+      node.parentNode.replaceChild(frag, node);
+    });
+  }
+  function applyFaq() {
+    if (!faq) { return; }
+    var query = faq.input.value.trim();
+    var words = query ? query.split(/\s+/) : [];
+    var matchAll = faq.optAll ? faq.optAll.checked : true;
+    var answers = faq.optAnswers ? faq.optAnswers.checked : true;
+    var whole = faq.optWhole ? faq.optWhole.checked : false;
+    var perWord = words.map(function (w) { return wordRegex([w], whole); });
+    var hiRe = words.length ? wordRegex(words, whole) : null;
+    var shown = 0;
+    faq.entries.forEach(function (e) {
+      if (e.marked) { e.sum.innerHTML = e.sumHtml; if (e.body) { e.body.innerHTML = e.bodyHtml; } e.marked = false; }
+      var inCat = (faq.cat === 'all' || e.cat === faq.cat);
+      var hit = true;
+      if (words.length) {
+        var text = e.sum.textContent + (answers && e.body ? '\n' + e.body.textContent : '');
+        var tests = perWord.map(function (re) { re.lastIndex = 0; return re.test(text); });
+        hit = matchAll ? tests.every(Boolean) : tests.some(Boolean);
+      }
+      var visible = inCat && hit;
+      e.el.hidden = !visible;
+      if (visible) {
+        shown++;
+        if (hiRe) {
+          highlight(e.sum, hiRe);
+          if (answers && e.body) { highlight(e.body, hiRe); }
+          e.marked = true;
+          if (!e.el.open) { e.el.open = true; e.autoOpened = true; }
+        } else if (e.autoOpened) {
+          e.el.open = false;
+          e.autoOpened = false;
+        }
+      }
+    });
+    if (faq.count) { faq.count.textContent = fmt(S.resultCounter, { shown: shown, total: faq.entries.length }); }
+    if (faq.none) { faq.none.hidden = (shown > 0); }
+    updateExpandLabel();
+  }
+  function focusFaqSearch() {
+    if (!faq) { return; }
+    if (current !== faqSectionId && faqSectionId) {
+      if (decodeHash(location.hash) === faqSectionId) { route(); } else { location.hash = '#' + faqSectionId; route(); }
+    }
+    faq.input.focus();
+    faq.input.select();
+  }
+
+  /* ---------------- events ---------------- */
+  document.addEventListener('click', function (ev) {
+    var btn = closest(ev.target, '.copy-btn');
+    if (btn) {
+      var box = closest(btn, '.code');
+      var code = box ? box.querySelector('pre code') : null;
+      if (code) {
+        copyText(code.textContent, function () {
+          btn.textContent = S.copied;
+          btn.classList.add('is-done');
+          window.setTimeout(function () { btn.textContent = S.copy; btn.classList.remove('is-done'); }, 1500);
+        });
+      }
+      return;
+    }
+    var more = closest(ev.target, '.code-more');
+    if (more) {
+      var cbox = closest(more, '.code');
+      var hidden = parseInt(cbox.getAttribute('data-hidden'), 10) || 0;
+      var collapsed = cbox.classList.toggle('collapsed');
+      more.textContent = collapsed ? fmt(S.showMore, { n: hidden }) : S.showFewer;
+      more.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      return;
+    }
+    if (toTop && closest(ev.target, '#to-top')) {
+      landing = null;
+      scrollToTopAnimated();
+      return;
+    }
+    var a = closest(ev.target, 'a[href]');
+    if (!a) { return; }
+    var href = a.getAttribute('href') || '';
+    if (href.charAt(0) !== '#' || href.length < 2) { return; }
+    /* same-hash click: browsers fire no hashchange, so re-run the router */
+    if (decodeHash(href) === decodeHash(location.hash)) {
+      ev.preventDefault();
+      route();
+    }
+  });
+
+  window.addEventListener('hashchange', route);
+
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (ticking) { return; }
+    ticking = true;
+    window.requestAnimationFrame(function () { ticking = false; spy(); updateToTop(); });
+  }, { passive: true });
+
+  var resizing = false;
+  window.addEventListener('resize', function () {
+    if (resizing) { return; }
+    resizing = true;
+    window.requestAnimationFrame(function () { resizing = false; positionToTop(); });
+  });
+
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key !== '/' || ev.ctrlKey || ev.metaKey || ev.altKey) { return; }
+    var t = ev.target;
+    var tag = (t && t.tagName) ? t.tagName.toLowerCase() : '';
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || (t && t.isContentEditable)) { return; }
+    if (!faq) { return; }
+    ev.preventDefault();
+    focusFaqSearch();
+  });
+
+  /* print: open every FAQ entry, restore afterwards */
+  var printState = null;
+  window.addEventListener('beforeprint', function () {
+    printState = toArray(document.querySelectorAll('details.faq')).map(function (d) { var was = d.open; d.open = true; return { el: d, open: was }; });
+  });
+  window.addEventListener('afterprint', function () {
+    if (!printState) { return; }
+    printState.forEach(function (s) { s.el.open = s.open; });
+    printState = null;
+  });
+
+  if (toTop && S.backToTop) { toTop.setAttribute('aria-label', S.backToTop); toTop.setAttribute('title', S.backToTop); }
+  initFaq();
+  route();
+  positionToTop();
+  updateToTop();
+})();
+</script>
+</body>
+</html>
