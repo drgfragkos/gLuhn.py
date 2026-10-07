@@ -128,7 +128,7 @@ $pans = @($r.Lines | Where-Object { $_ -like '`[+`] Valid PAN*' } | ForEach-Obje
 Assert-Equal 41 $pans.Count 'README example count'
 Assert-True ($pans -contains '4542109545565554') 'README example contains Visa'
 Assert-True (-not ($pans -contains '3742109545565554')) '16-digit Amex excluded'
-$r = Invoke-GLuhn @('-NoIin', '???2109545565554')
+$r = Invoke-GLuhn @('-NoIIN', '???2109545565554')
 Assert-Contains $r.Out 'Total valid PAN generated: 100' 'Luhn-only generation count'
 $r = Invoke-GLuhn @('-b', 'visa,mastercard', '??42109545565554')
 $pans = @($r.Lines | Where-Object { $_ -like '`[+`] Valid PAN*' } | ForEach-Object { ($_ -split '\s+')[3] })
@@ -437,20 +437,21 @@ try {
 
 if (Test-Path $repoJson) {
     $r = Invoke-GLuhn @('4929401234567881')
-    Assert-Contains $r.Out 'Issuer (repo): BARCLAYS BANK PLC | VISA | CREDIT | PREMIER | United Kingdom  [BIN 492940]' 'shipped repository lookup'
+    Assert-Contains $r.Out 'Issuer (repo): BARCLAYS BANK' 'shipped repository lookup'
+    Assert-Contains $r.Out 'United Kingdom  [BIN 492940' 'shipped repository range'
     $r = Invoke-GLuhn @('-NoRepo', '4929401234567881')
     Assert-NotContains $r.Out 'Issuer (repo)' '-NoRepo'
     $r = Invoke-GLuhn @('-RepoList', 'visa,GB')
     Assert-Equal 0 $r.Code '-RepoList exit code'
     Assert-Contains $r.Out 'BARCLAYS BANK PLC' '-RepoList content'
     $j = (Invoke-GLuhn @('-RepoIssuer', 'barclaycard', '-j')).Out | ConvertFrom-Json
-    Assert-Equal 'VISA' @($j)[0].brand '-RepoIssuer json'
+    Assert-True (@($j | Where-Object { $_.brand -eq 'VISA' }).Count -gt 0) '-RepoIssuer json'
     $r = Invoke-GLuhn @('-RepoList', 'nosuchbrand')
     Assert-Equal 1 $r.Code '-RepoList empty exits 1'
     $r = Invoke-GLuhn @('49294012345678?1')
-    Assert-Contains $r.Out '[BARCLAYS BANK PLC | United Kingdom]' 'generation shows issuer'
+    Assert-Contains $r.Out '[BARCLAYS BANK' 'generation shows issuer'
     $j = (Invoke-GLuhn @('-j', '4929401234567881')).Out | ConvertFrom-Json
-    Assert-Equal 'BARCLAYS BANK PLC' $j.repository.issuer 'json repository field'
+    Assert-Contains $j.repository.issuer 'BARCLAYS' 'json repository field'
 } else { Write-Output '  (skipped shipped repository checks: bin-repository.json not built)' }
 
 Write-Output ''

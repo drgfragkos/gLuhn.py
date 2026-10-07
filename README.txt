@@ -31,7 +31,8 @@ usage: gLuhn.py  [options] [PAN ...]
 
 Issuer identification: repository/bin-repository.json (shared by both scripts through
 repository/gluhn_repository.py and repository/GLuhnRepository.psm1) names the issuing bank,
-country, card type and category for 343,063 BINs, e.g. "Visa issued by Barclays Bank PLC,
+country, card type and category for 590,199 BINs (24,260 issuers, 226 countries, with
+8-digit sub-ranges where the sources have them), e.g. "Visa issued by Barclays Bank UK PLC,
 United Kingdom". It is used automatically; --repo-list visa GB lists the banks that issue a
 brand in a country, --repo-issuer barclaycard the brands of a bank. See repository/README.md
 for sources and how to rebuild it (python3 repository/build_repository.py).
@@ -40,8 +41,8 @@ Full documentation: Docs/User-Guide.html (single file, open it in any browser) b
 Docs/User-Guide.md with Tools/Build-UserGuide.ps1 (see Docs/guide/README.md).
 
 Options (Python / PowerShell):
-  -i,  --iin / -Iin             validation: also require a known IIN/scheme and a plausible length
-       --no-iin / -NoIin        generation and scan: Luhn only, no IIN filtering
+  -i,  --iin / -IIN             validation: also require a known IIN/scheme and a plausible length
+       --no-iin / -NoIIN        generation and scan: Luhn only, no IIN filtering
        --ignore-length          do not treat a scheme length mismatch as a failure
   -b,  --brand BRANDS / -Brand  restrict matching to these schemes (comma separated, e.g. visa,mastercard)
        --active-only            ignore defunct schemes (Laser, Solo, Switch, Bankcard, enRoute, ...)
@@ -306,6 +307,14 @@ $ git clone https://github.com/drgfragkos/gLuhn.py.git
 
 
 Version:
+1.3.0 : 2026/10/07 - Issuer repository rebuilt from newer open data: the binlist.io merged set
+                     (CC BY 4.0, 458,051 BINs, refreshed 2026) plus OpenBIIN (GPL-3.0, 8-digit
+                     sub-ranges); 590,199 BINs, 24,260 issuers, 226 countries. Builder accepts
+                     named sources (--sources binlistio,openbiin,venelin,iannuttall,binlistnet),
+                     local copies and extra CSVs. Test numbers are attributed to their publisher
+                     (Visa, Mastercard, Amex, Discover, Diners, JCB, UnionPay, Maestro, Dankort,
+                     Stripe, Braintree, Adyen, Worldpay): 83 numbers. PowerShell switches
+                     renamed -IIN / -NoIIN. User guide rewritten around analyst use cases.
 1.2.0 : 2026/10/07 - Issuer repository: repository/bin-repository.json built from the open
                      binlist-data set (343,063 BINs, 13,291 issuer names, 199 countries) by
                      repository/build_repository.py, which also merges extra CSV sources.
