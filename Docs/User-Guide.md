@@ -21,9 +21,9 @@ same options and the same output.
 ## 1. Overview
 
 gLuhn answers four questions about a card number: is it well formed (Luhn check digit),
-which network issued it (IIN range, length rule, MII), which bank issued it (offline BIN
-list or an online lookup that only ever sends the IIN), and where does it appear in a set of
-files. It also completes partially known numbers, decodes track 1 / track 2 data and EMV
+which network issued it (IIN range, length rule, MII), which bank issued it (the bundled
+issuer repository, an extra BIN list, or an online lookup that only ever sends the IIN), and
+where does it appear in a set of files. It also completes partially known numbers, decodes track 1 / track 2 data and EMV
 TLV dumps, and recognises test numbers and look-alikes such as IMEIs so that findings are
 not inflated.
 
@@ -77,8 +77,12 @@ Luhn:         valid
 MII:          4 - Banking and financial (Visa)
 IIN:          454210 / 45421095  (6-digit / 8-digit)
 Scheme:       Visa  (IIN range 4; length OK)
+Issuer (repo): UC CARD CO., LTD. | VISA | CREDIT | CLASSIC | Japan  [BIN 454210]
 Result:       [+] Valid PAN
 ```
+
+The "Issuer (repo)" line comes from the bundled issuer repository (see [3.8](#s3/3.8)); a
+Visa card is identified as a Visa and, when the BIN is on record, as issued by a named bank.
 
 ### 2.2 Complete a partially known number
 
@@ -207,6 +211,29 @@ authorisation. gLuhn prints an attention line whenever it decodes track data or 
 shows the typical PVKI / PVV / CVV1 layout of track 2 discretionary data so investigators
 recognise it, and flags expiry dates or CVV-like values found next to a PAN during a scan.
 
+### 3.8 Issuer repository
+
+The scheme table identifies the network. The issuer repository,
+`repository/bin-repository.json`, goes one level deeper: for 343,063 BINs it names the
+issuing bank, its country, the card type (credit, debit, prepaid) and the product category
+(classic, gold, business). It is built from the open binlist-data set by
+`repository/build_repository.py`, which merges consecutive BINs with the same attributes
+into ranges and can fold in further CSV sources such as per-brand issuer lists you export
+yourself. One JSON file is shared by both scripts through two small modules,
+`gluhn_repository.py` and `GLuhnRepository.psm1`, so a data refresh needs no code change.
+
+Lookups take the longest matching prefix (eight digit entries beat six digit ones) and are
+answered from a sorted index with a binary search, so the cost is in loading the 4.7 MB file
+once per run, not per number. The repository is used automatically when the file exists;
+`--no-repo` switches it off and `--repo PATH` points at another build. Two reverse
+questions are answered from the same file: `--repo-list visa GB` lists the banks that issue
+Visa cards in the United Kingdom and `--repo-issuer barclaycard` lists the brands and
+countries of a bank.
+
+> **Note.** About half of the BINs on record carry no bank name but still give brand, type
+> and country. BIN assignments change over time, so quote the repository's `generated` date
+> in reports and rebuild it when precision matters.
+
 ## 4. Installation and files
 
 ### 4.1 Python
@@ -242,7 +269,8 @@ powershell -ExecutionPolicy Bypass -File tests\gLuhn.Tests.ps1
 
 | Data | How to get it | Used by |
 |---|---|---|
-| BIN list (issuing bank, country, card type) | `--update-bin-db` downloads the open binlist-data CSV (about 25 MB) to `~/.gluhn/binlist-data.csv` | `--bin-db auto` |
+| Issuer repository (bundled) | `repository/bin-repository.json`, rebuilt with `python3 repository/build_repository.py` | automatic, `--repo-list`, `--repo-issuer` |
+| Extra BIN list (CSV) | `--update-bin-db` downloads the open binlist-data CSV (about 25 MB) to `~/.gluhn/binlist-data.csv`, or any CSV of your own | `--bin-db auto` |
 | Online lookup | none; `--lookup` queries binlist.net or any service with a `{iin}` URL | `--lookup` |
 | Extra or corrected IIN ranges | a JSON file, see UC9, or `Tools/update_iin_table.py` | `--iin-table` |
 
@@ -261,6 +289,22 @@ CARD: tests -> 5.1 UC1: Validate and identify a number
   folder: tests/
   for: test_gluhn.py (unittest) and gLuhn.Tests.ps1 (no Pester). Both suites cover every mode and compare behaviour.
   needs: Python 3 or PowerShell
+CARD: bin-repository.json -> 5.3 UC3: Find the issuing bank offline
+  folder: repository/
+  for: The issuer repository shared by both scripts: bank, country, type and category per BIN, plus the brand-to-country-to-bank index.
+  needs: nothing; rebuild with build_repository.py (Python 3) when the sources change
+CARD: gluhn_repository.py -> 5.3 UC3: Find the issuing bank offline
+  folder: repository/
+  for: Python lookup module and small CLI over bin-repository.json; gLuhn.py imports it by path.
+  needs: Python 3
+CARD: GLuhnRepository.psm1 -> 5.3 UC3: Find the issuing bank offline
+  folder: repository/
+  for: PowerShell lookup module over the same JSON; gLuhn.ps1 imports it by path. Uses JavaScriptSerializer on 5.1 because ConvertFrom-Json is capped at 2 MB there.
+  needs: Windows PowerShell 5.1 or PowerShell 7
+CARD: build_repository.py -> 5.3 UC3: Find the issuing bank offline
+  folder: repository/
+  for: Builds bin-repository.json from binlist-data and any extra CSV sources (later sources override earlier ones).
+  needs: Python 3, network access for the default source
 CARD: update_iin_table.py -> 5.9 UC9: Extend or override the scheme table
   folder: Tools/
   for: Regenerates Tools/iin-table.braintree.json from the open-source braintree range list for use with --iin-table.
@@ -323,27 +367,40 @@ completion regardless of scheme.
 
 ### 5.3 UC3: Find the issuing bank offline
 
-**Situation.** You need the bank, country and card type for a batch of numbers without
-sending anything over the network at query time.
+**Situation.** You need the bank, country and card type for a number or a batch of numbers
+without sending anything over the network at query time.
 
 ```bash
-python3 gLuhn.py --update-bin-db --bin-db auto -q 4542109540018054
-python3 gLuhn.py --bin-db auto -f numbers.txt
+python3 gLuhn.py 4929401234567881
+python3 gLuhn.py -q -f numbers.txt
+python3 gLuhn.py --repo-list visa GB
+python3 gLuhn.py --repo-issuer barclaycard
 ```
 
-**Expect.** The first command downloads the open binlist-data CSV once (about 25 MB, from
-GitHub) and prints `[i] BIN database loaded: 343063 rows`. Each result then carries an
-issuer line:
+**Expect.** The bundled issuer repository is used automatically, so every result carries an
+issuer line when the BIN is on record:
 
 ```text
-Issuer (DB):  UC CARD CO., LTD. | VISA | CREDIT | CLASSIC | Japan  [454210]
+Scheme:       Visa  (IIN range 4; length OK)
+Issuer (repo): BARCLAYS BANK PLC | VISA | CREDIT | PREMIER | United Kingdom  [BIN 492940]
+              www.barclays.co.uk 0800 151 0900
 ```
 
-Any CSV with a header naming a start column (`bin`, `iin`, `iin_start`, `prefix`) works;
-an optional end column (`iin_end`, `bin_end`) turns rows into ranges. The longest matching
-prefix wins, so eight digit rows beat six digit rows.
+`--repo-list visa GB` prints the 144 banks that issue Visa cards in the United Kingdom with
+their websites; `--repo-issuer barclaycard` prints the brands and countries of a bank. Both
+accept `-j` for JSON and `--format csv`.
 
-**Next.** For scans, `--bin-db` fills the issuer column of the CSV report (UC6).
+An extra CSV BIN list can be layered on top with `--bin-db`: `--update-bin-db` downloads
+the open binlist-data CSV once (about 25 MB) and `--bin-db auto` uses it. Any CSV with a
+header naming a start column (`bin`, `iin`, `iin_start`, `prefix`) works; an optional end
+column (`iin_end`, `bin_end`) turns rows into ranges. Longest matching prefix wins.
+
+**Next.** Scan reports fill their issuer column from the repository (UC6). To refresh or
+extend the repository, run `python3 repository/build_repository.py`, optionally with
+`--source your-list.csv` for issuer lists you exported yourself; see `repository/README.md`.
+
+> **Note.** A lookup says "issued by X according to the list dated `generated`". Banks merge
+> and portfolios move, so keep that date next to the finding.
 
 ### 5.4 UC4: Online IIN lookup
 
@@ -550,7 +607,11 @@ END: Report with masked numbers, confidence levels and file hashes
 | `--max-file-size MB` | `-MaxFileSize MB` | skip larger files (default 64) |
 | `--min-score N` | `-MinScore N` | report only hits with score N or more |
 | `--emv HEX` | `-Emv HEX` | decode EMV TLV data; `@file` reads a file |
-| `--bin-db CSV` | `-BinDb CSV` | BIN list for issuer lookup; `auto` means the downloaded file |
+| `--repo [JSON]` | `-Repo JSON` | issuer repository to use (default `repository/bin-repository.json`, automatic when present) |
+| `--no-repo` | `-NoRepo` | do not use the issuer repository |
+| `--repo-list BRAND [CC]` | `-RepoList BRAND[,CC]` | banks issuing a brand, optionally in one country, then exit |
+| `--repo-issuer NAME` | `-RepoIssuer NAME` | brands and countries of a bank (name substring), then exit |
+| `--bin-db CSV` | `-BinDb CSV` | extra BIN list for issuer lookup; `auto` means the downloaded file |
 | `--update-bin-db` | `-UpdateBinDb` | download the open binlist-data CSV first |
 | `--lookup` | `-Lookup` | online IIN lookup (IIN only) |
 | `--lookup-url URL` | `-LookupUrl URL` | lookup template containing `{iin}` (default binlist.net) |
@@ -580,7 +641,8 @@ END: Report with masked numbers, confidence levels and file hashes
 | `IIN` | six and eight digit issuer identification number |
 | `Scheme` | best match, its IIN range, the length verdict; defunct schemes are marked |
 | `Also matches` | every other scheme whose range matched |
-| `Issuer (DB)` | issuer, brand, type, category and country from the BIN list |
+| `Issuer (repo)` | issuer, brand, type, category and country from the bundled repository, with the matching BIN range |
+| `Issuer (DB)` | the same from an extra `--bin-db` CSV |
 | `Lookup` | the online service result or its error |
 | `Test number` | the source that publishes the number as a test fixture |
 | `Look-alike` | IMEI or ICCID hint |
@@ -590,7 +652,7 @@ END: Report with masked numbers, confidence levels and file hashes
 
 Validation objects carry `pan`, `length`, `well_formed`, `luhn`, `luhn_expected`, `mii`,
 `iin6`, `iin8`, `scheme`, `scheme_key`, `scheme_active`, `scheme_note`, `iin_range`,
-`length_ok`, `expected_lengths`, `also_matches`, `issuer`, `test_card`, `lookalike`,
+`length_ok`, `expected_lengths`, `also_matches`, `issuer`, `repository`, `test_card`, `lookalike`,
 `lookup`, `valid` and `reasons`. Scan hits add `source`, `line`, `column`, `duplicate`,
 `score`, `confidence`, `signals` and `sha256`. Track results are `{track, validation}`;
 EMV results are `{tags, summary, bytes}`. One input gives one object, several give an array,
@@ -692,6 +754,8 @@ output, and lower the scan confidence score.
 | Scan finds nothing in a PDF | text is fragmented or stored in an encoded font | export the PDF to text with a dedicated tool and scan that |
 | Scan reports digits from inside a binary file | binaries are scanned as text on purpose | review the signals; use `--min-score` or `--exclude` |
 | Non-ASCII bank names look garbled on Windows PowerShell 5.1 | console code page | run `chcp 65001` first or write the output to a file |
+| `[i] issuer repository not loaded` | `repository/bin-repository.json` is missing or unreadable | run `python3 repository/build_repository.py`, or ignore it: everything else still works |
+| PowerShell takes two seconds longer per run | the 4.7 MB repository is parsed on every start | use `-NoRepo` for bulk validation runs that do not need the bank, or batch numbers with `-f` |
 | EMV: "constructed tag without valid TLV content" | a template contains proprietary data or the dump is truncated | the tag is shown as hex; check the dump length |
 
 ## 9. FAQ
@@ -726,9 +790,23 @@ printed.
 
 **Q: How do I see the issuing bank?** `[Usage]`
 
-Use `--bin-db auto` after one `--update-bin-db` (offline, about 25 MB), or `--lookup`
-(online, IIN only). Both fill the issuer line in text output and the issuer field in JSON
-and CSV.
+It is shown automatically from the bundled issuer repository ("Issuer (repo)"). For BINs
+the repository does not know, add `--bin-db auto` after one `--update-bin-db` (offline) or
+`--lookup` (online, IIN only). All three fill the issuer fields in JSON and CSV.
+
+**Q: Which banks issue Visa cards in my country?** `[Usage]`
+
+`--repo-list visa GB` (PowerShell: `-RepoList visa,GB`) lists them with their websites;
+`--repo-issuer <name>` answers the reverse question for a bank. Brands accept the usual
+aliases: `amex`, `unionpay`, `diners`, `mc`.
+
+**Q: Where does the issuer data come from and how do I update it?** `[General]`
+
+From the open binlist-data set, compiled into `repository/bin-repository.json` by
+`repository/build_repository.py`. Run the builder again to refresh it, and pass
+`--source file.csv` to merge issuer lists from other places, for example the per-brand pages
+of creditcardvalidator.org exported to CSV. Both scripts read the same JSON through a small
+module each, so an update is a data change only.
 
 **Q: Is anything sent over the network?** `[Security]`
 

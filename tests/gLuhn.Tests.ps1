@@ -387,6 +387,72 @@ if ($py -and (Test-Path $mock)) {
     } finally { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }
 } else { Write-Output '  (skipped: python not found for the mock lookup server)' }
 
+Write-Output '- repository: issuer lookup (module and integration)'
+$repoDir = Join-Path (Split-Path -Parent $PSScriptRoot) 'repository'
+$repoJson = Join-Path $repoDir 'bin-repository.json'
+Import-Module (Join-Path $repoDir 'GLuhnRepository.psm1') -Force -DisableNameChecking
+# a small repository built in the test so the module is checked independently of the shipped data
+$tmpRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("gluhn_repo_" + [guid]::NewGuid().ToString('N') + '.json')
+try {
+    $small = @'
+{"format":"gluhn-bin-repository/1","generated":"2026-01-01","sources":[{"name":"test","rows":4}],
+ "counts":{"bins":4,"ranges":3,"issuers":2,"countries":2,"brands":3},
+ "brands":["VISA","MASTERCARD","AMERICAN EXPRESS"],"types":["","CREDIT","DEBIT"],"categories":["","PREMIER"],
+ "countries":{"GB":"United Kingdom","US":"United States"},
+ "issuers":[{"n":"BARCLAYS BANK PLC","c":"GB","u":"www.barclays.co.uk"},{"n":"AMERICAN EXPRESS COMPANY","c":"US"}],
+ "ranges":{"6":[[492940,492941,0,1,1,0,"GB"],[555555,555555,1,1,0,-1,"US"]],"8":[[37828224,37828224,2,1,0,1,"US"]]},
+ "by_brand":{"VISA":{"GB":[0]},"AMERICAN EXPRESS":{"US":[1]}}}
+'@
+    [System.IO.File]::WriteAllText($tmpRepo, $small, (New-Object System.Text.UTF8Encoding $false))
+    $repo = Import-BinRepository -Path $tmpRepo
+    $hit = Find-BinRepositoryIssuer -Repository $repo -Pan '4929 4112 3456 7891'
+    Assert-Equal 'BARCLAYS BANK PLC' $hit['issuer'] 'module lookup issuer'
+    Assert-Equal '492940-492941' $hit['range'] 'module lookup range'
+    Assert-Equal 'United Kingdom' $hit['country'] 'module lookup country'
+    Assert-Equal 'PREMIER' $hit['category'] 'module lookup category'
+    $hit = Find-BinRepositoryIssuer -Repository $repo -Pan '378282246310005'
+    Assert-Equal 8 $hit['prefix_length'] 'longest prefix wins'
+    $hit = Find-BinRepositoryIssuer -Repository $repo -Pan '5555555555554444'
+    Assert-True ($null -eq $hit['issuer']) 'unknown issuer is null'
+    Assert-Equal 'MASTERCARD' $hit['brand'] 'brand without issuer'
+    Assert-True ($null -eq (Find-BinRepositoryIssuer -Repository $repo -Pan '4000000000000000')) 'miss returns null'
+    Assert-True ($null -eq (Find-BinRepositoryIssuer -Repository $repo -Pan '12')) 'short input returns null'
+    $rows = @(Get-BinRepositoryIssuers -Repository $repo -Brand visa -CountryCode gb)
+    Assert-Equal 1 $rows.Count 'issuers for brand/country'
+    Assert-Equal 'BARCLAYS BANK PLC' $rows[0]['issuer'] 'issuers for brand/country name'
+    $rows = @(Get-BinRepositoryIssuers -Repository $repo -Brand amex)
+    Assert-Equal 'AMERICAN EXPRESS COMPANY' $rows[0]['issuer'] 'brand alias amex'
+    Assert-Equal 0 @(Get-BinRepositoryIssuers -Repository $repo -Brand nosuch).Count 'unknown brand'
+    $rows = @(Get-BinRepositoryBrandsForIssuer -Repository $repo -Name barclays)
+    Assert-Equal 'VISA' $rows[0]['brand'] 'brands for issuer'
+    Assert-Contains (Format-BinRepositoryLookup $hit) '[BIN 555555]' 'format line'
+    Assert-Equal 'no issuer information' (Format-BinRepositoryLookup $null) 'format null'
+    [System.IO.File]::WriteAllText($tmpRepo, '{"format":"other"}')
+    $threw = $false
+    try { Import-BinRepository -Path $tmpRepo | Out-Null } catch { $threw = $true }
+    Assert-True $threw 'unsupported format rejected'
+    $r = Invoke-GLuhn @('-Repo', $tmpRepo, '4111111111111111')
+    Assert-Equal 2 $r.Code 'bad -Repo exits 2'
+} finally { Remove-Item -Force $tmpRepo -ErrorAction SilentlyContinue }
+
+if (Test-Path $repoJson) {
+    $r = Invoke-GLuhn @('4929401234567881')
+    Assert-Contains $r.Out 'Issuer (repo): BARCLAYS BANK PLC | VISA | CREDIT | PREMIER | United Kingdom  [BIN 492940]' 'shipped repository lookup'
+    $r = Invoke-GLuhn @('-NoRepo', '4929401234567881')
+    Assert-NotContains $r.Out 'Issuer (repo)' '-NoRepo'
+    $r = Invoke-GLuhn @('-RepoList', 'visa,GB')
+    Assert-Equal 0 $r.Code '-RepoList exit code'
+    Assert-Contains $r.Out 'BARCLAYS BANK PLC' '-RepoList content'
+    $j = (Invoke-GLuhn @('-RepoIssuer', 'barclaycard', '-j')).Out | ConvertFrom-Json
+    Assert-Equal 'VISA' @($j)[0].brand '-RepoIssuer json'
+    $r = Invoke-GLuhn @('-RepoList', 'nosuchbrand')
+    Assert-Equal 1 $r.Code '-RepoList empty exits 1'
+    $r = Invoke-GLuhn @('49294012345678?1')
+    Assert-Contains $r.Out '[BARCLAYS BANK PLC | United Kingdom]' 'generation shows issuer'
+    $j = (Invoke-GLuhn @('-j', '4929401234567881')).Out | ConvertFrom-Json
+    Assert-Equal 'BARCLAYS BANK PLC' $j.repository.issuer 'json repository field'
+} else { Write-Output '  (skipped shipped repository checks: bin-repository.json not built)' }
+
 Write-Output ''
 Write-Output "Passed: $script:Pass   Failed: $script:Fail"
 if ($script:Fail -gt 0) { exit 1 }

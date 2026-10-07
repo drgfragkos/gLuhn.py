@@ -803,6 +803,33 @@ def download_bin_db(path: str = DEFAULT_BIN_DB_PATH, url: str = BINLIST_DATA_URL
 
 
 # ---------------------------------------------------------------------------------
+# Issuer repository (repository/bin-repository.json via repository/gluhn_repository.py)
+# ---------------------------------------------------------------------------------
+REPOSITORY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "repository")
+DEFAULT_REPOSITORY_PATH = os.path.join(REPOSITORY_DIR, "bin-repository.json")
+
+
+def load_repository(path: Optional[str] = None):
+    """
+    Load the shared issuer repository through the gluhn_repository module.  Returns the
+    BinRepository object; raises OSError / ValueError / ImportError when it cannot.
+    """
+    import importlib.util
+    module_path = os.path.join(REPOSITORY_DIR, "gluhn_repository.py")
+    spec = importlib.util.spec_from_file_location("gluhn_repository", module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError("repository module not found: %s" % module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.BinRepository(path or DEFAULT_REPOSITORY_PATH)
+
+
+def repository_line(info: Optional[Dict]) -> str:
+    bits = [info.get(k) for k in ("issuer", "brand", "type", "category", "country") if info.get(k)]
+    return "%s  [BIN %s]" % (" | ".join(bits) if bits else "no issuer name on record", info["range"])
+
+
+# ---------------------------------------------------------------------------------
 # Validation of a single PAN
 # ---------------------------------------------------------------------------------
 def normalise(text: str) -> str:
@@ -886,18 +913,18 @@ def mii_info(pan: str) -> Dict[str, str]:
 
 def validate_pan(pan: str, require_iin: bool = False, check_length: bool = True,
                  schemes: Sequence[Scheme] = SCHEMES, bin_db: Optional[BinDatabase] = None,
-                 lookup: Optional["OnlineLookup"] = None) -> Dict:
+                 lookup: Optional["OnlineLookup"] = None, repository=None) -> Dict:
     """
     Full assessment of one PAN.  Returns a dict (JSON-friendly) with:
       pan, length, well_formed, luhn, mii, iin6, iin8, scheme(s), length_ok, issuer,
-      test_card, lookalike, lookup, valid, reasons
+      repository, test_card, lookalike, lookup, valid, reasons
     """
     pan = normalise(pan)
     result: Dict = {
         "pan": pan, "length": len(pan), "well_formed": False, "luhn": False,
         "scheme": None, "scheme_key": None, "iin_range": None, "length_ok": None,
-        "also_matches": [], "issuer": None, "test_card": None, "lookalike": None, "lookup": None,
-        "valid": False, "reasons": [],
+        "also_matches": [], "issuer": None, "repository": None, "test_card": None, "lookalike": None,
+        "lookup": None, "valid": False, "reasons": [],
     }
     if not pan.isdigit():
         result["reasons"].append("contains non-digit characters")
@@ -930,6 +957,8 @@ def validate_pan(pan: str, require_iin: bool = False, check_length: bool = True,
             for m in matches[1:]]
     if bin_db is not None:
         result["issuer"] = bin_db.lookup(pan)
+    if repository is not None:
+        result["repository"] = repository.lookup(pan)
     result["test_card"] = is_test_card(pan)
     result["lookalike"] = lookalike_hint(pan)
     if lookup is not None and result["well_formed"]:
@@ -1201,7 +1230,7 @@ def score_hit(line: str, start: int, end: int, result: Dict) -> Tuple[int, str, 
 
 def scan_text(lines: Iterable[str], require_iin: bool = True, check_length: bool = True,
               schemes: Sequence[Scheme] = SCHEMES, bin_db: Optional[BinDatabase] = None,
-              min_score: int = 0, source: str = "<text>") -> Iterator[Dict]:
+              min_score: int = 0, source: str = "<text>", repository=None) -> Iterator[Dict]:
     """Yield validate_pan() results (plus line, column, score, confidence, signals) for each hit."""
     seen = set()
     for lineno, line in enumerate(lines, 1):
@@ -1212,7 +1241,7 @@ def scan_text(lines: Iterable[str], require_iin: bool = True, check_length: bool
             if len(set(pan)) == 1:          # 0000000000000000 and friends
                 continue
             r = validate_pan(pan, require_iin=require_iin, check_length=check_length,
-                             schemes=schemes, bin_db=bin_db)
+                             schemes=schemes, bin_db=bin_db, repository=repository)
             if not r["valid"]:
                 continue
             score, level, signals = score_hit(line, m.start(), m.end(), r)
@@ -1570,7 +1599,7 @@ def _walk_tlv(nodes: List[Dict]) -> Iterator[Dict]:
 
 def decode_emv(text: str, schemes: Sequence[Scheme] = SCHEMES, bin_db: Optional[BinDatabase] = None,
                require_iin: bool = False, check_length: bool = True,
-               lookup: Optional[OnlineLookup] = None) -> Dict:
+               lookup: Optional[OnlineLookup] = None, repository=None) -> Dict:
     """Decode a hex TLV dump and summarise what matters for card identification."""
     data = bytes.fromhex(_clean_hex(text))
     nodes = parse_tlv(data)
@@ -1617,7 +1646,7 @@ def decode_emv(text: str, schemes: Sequence[Scheme] = SCHEMES, bin_db: Optional[
         summary["service_code"] = summary["track2"].get("service_code")
     if summary["pan"]:
         summary["validation"] = validate_pan(summary["pan"], require_iin=require_iin, check_length=check_length,
-                                             schemes=schemes, bin_db=bin_db, lookup=lookup)
+                                             schemes=schemes, bin_db=bin_db, lookup=lookup, repository=repository)
         v = summary["validation"]
         if summary["aid"] and v.get("scheme") and summary["aid"]["scheme"].split(" ")[0].lower() not in v["scheme"].lower() \
                 and not any(summary["aid"]["scheme"].split(" ")[0].lower() in a["scheme"].lower() for a in v.get("also_matches", [])):
@@ -1680,6 +1709,11 @@ def print_validation(r: Dict, opts: OutputOptions) -> None:
     if iss:
         bits = [iss.get(k) for k in ("issuer", "brand", "type", "category", "country") if iss.get(k)]
         print("Issuer (DB):  %s  [%s]" % (" | ".join(bits), iss.get("iin")))
+    rp = r.get("repository")
+    if rp:
+        print("Issuer (repo): %s" % repository_line(rp))
+        if rp.get("url") or rp.get("phone"):
+            print("              %s" % " ".join(x for x in (rp.get("url"), rp.get("phone")) if x))
     lk = r.get("lookup")
     if lk:
         if lk.get("error"):
@@ -1825,6 +1859,9 @@ SCAN_CSV_FIELDS = ("source", "line", "column", "pan", "scheme", "iin_range", "co
 
 def scan_row(r: Dict, opts: OutputOptions) -> Dict:
     iss = r.get("issuer") or {}
+    if not iss and r.get("repository"):
+        rp = r["repository"]
+        iss = {"issuer": rp.get("issuer") or "", "country": rp.get("country") or ""}
     return {
         "source": r.get("source"), "line": r.get("line"), "column": r.get("column"),
         "pan": opts.pan(r["pan"]), "scheme": r.get("scheme") or "", "iin_range": r.get("iin_range") or "",
@@ -1887,6 +1924,12 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--max-file-size", type=float, default=64.0, metavar="MB", help="skip files larger than MB (default 64)")
     g.add_argument("--min-score", type=int, default=0, metavar="N", help="scan: report only hits with confidence score >= N")
     g = p.add_argument_group("issuer information")
+    g.add_argument("--repo", metavar="JSON", nargs="?", const=DEFAULT_REPOSITORY_PATH, default=None,
+                   help="issuer repository (repository/bin-repository.json); used automatically when present")
+    g.add_argument("--no-repo", action="store_true", help="do not use the issuer repository")
+    g.add_argument("--repo-list", nargs="+", metavar=("BRAND", "COUNTRY"),
+                   help="list the banks that issue BRAND (e.g. visa) [in COUNTRY, ISO alpha-2] and exit")
+    g.add_argument("--repo-issuer", metavar="NAME", help="list the brands and countries of a bank (name substring) and exit")
     g.add_argument("--bin-db", metavar="CSV", help="CSV BIN/IIN database for issuer lookup ('auto' = %s)" % DEFAULT_BIN_DB_PATH)
     g.add_argument("--update-bin-db", action="store_true",
                    help="download the open binlist-data CSV to the --bin-db path (or the 'auto' path) first")
@@ -1958,6 +2001,36 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 bin_path, exc, "  (run with --update-bin-db to download it)" if bin_path == DEFAULT_BIN_DB_PATH else ""))
         if fmt == "text" and not args.quiet:
             print("[i] BIN database loaded: %d rows from %s" % (bin_db.rows, os.path.basename(bin_path)))
+    repository = None
+    repo_path = args.repo or (DEFAULT_REPOSITORY_PATH if os.path.exists(DEFAULT_REPOSITORY_PATH) else None)
+    if repo_path and not args.no_repo:
+        try:
+            repository = load_repository(repo_path)
+        except (OSError, ValueError, ImportError) as exc:
+            if args.repo:
+                parser.error("cannot load issuer repository: %s" % exc)
+            print("[i] issuer repository not loaded: %s" % exc)
+    if args.repo_list or args.repo_issuer:
+        if repository is None:
+            parser.error("the issuer repository is needed for --repo-list / --repo-issuer "
+                         "(build it with repository/build_repository.py)")
+        rows = (repository.issuers_for(args.repo_list[0], args.repo_list[1] if len(args.repo_list) > 1 else None)
+                if args.repo_list else repository.brands_for_issuer(args.repo_issuer))
+        if as_json or fmt == "csv":
+            if fmt == "csv":
+                w = csv.DictWriter(sys.stdout, fieldnames=list(rows[0].keys()) if rows else ["issuer"], lineterminator="\n")
+                w.writeheader()
+                w.writerows(rows)
+            else:
+                print(json.dumps(rows, indent=2, ensure_ascii=False))
+        else:
+            for row in rows:
+                if args.repo_list:
+                    print("%-3s %-45s %s" % (row["country_code"], row["issuer"], row.get("url") or ""))
+                else:
+                    print("%-45s %-18s %s" % (row["issuer"], row["brand"], row["country_code"]))
+            print("%d entries" % len(rows))
+        return 0 if rows else 1
     lookup = None
     if args.lookup:
         try:
@@ -1988,7 +2061,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         any_input = True
         try:
             e = decode_emv(args.emv, schemes=schemes, bin_db=bin_db, require_iin=args.iin,
-                           check_length=check_length, lookup=lookup)
+                           check_length=check_length, lookup=lookup, repository=repository)
         except (ValueError, OSError) as exc:
             print("[-] cannot decode EMV data: %s" % exc)
             return 1
@@ -2017,7 +2090,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                                          archives=not args.no_archives, skipped=skipped):
                 sources += 1
                 for r in scan_text(src.lines, require_iin=not args.no_iin, check_length=check_length,
-                                   schemes=schemes, bin_db=bin_db, min_score=args.min_score, source=src.name):
+                                   schemes=schemes, bin_db=bin_db, min_score=args.min_score, source=src.name,
+                                   repository=repository):
                     hits += 1
                     any_valid = True
                     r["sha256"] = src.sha256
@@ -2065,7 +2139,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 print("[-] %s: %s" % (exc, text if not opts.masked else "<track data>"))
                 continue
             v = validate_pan(t["pan"], require_iin=args.iin, check_length=check_length,
-                             schemes=schemes, bin_db=bin_db, lookup=lookup)
+                             schemes=schemes, bin_db=bin_db, lookup=lookup, repository=repository)
             any_valid |= v["valid"]
             if as_json:
                 if opts.masked:
@@ -2108,11 +2182,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         matches = identify(pan, schemes)
                         label = matches[0].scheme.name if matches else "unknown scheme"
                         extra = ""
-                        if bin_db is not None:
-                            iss = bin_db.lookup(pan)
-                            if iss:
-                                extra = "  [%s]" % " | ".join(
-                                    x for x in (iss.get("issuer"), iss.get("country")) if x)
+                        iss = bin_db.lookup(pan) if bin_db is not None else None
+                        if not iss and repository is not None:
+                            iss = repository.lookup(pan)
+                        if iss:
+                            extra = "  [%s]" % " | ".join(
+                                x for x in (iss.get("issuer"), iss.get("country")) if x)
                         if is_test_card(pan):
                             extra += "  (test number)"
                         print("[+] Valid PAN  %-20s %s%s" % (opts.pan(pan), label, extra))
@@ -2125,7 +2200,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         # Plain validation
         r = validate_pan(clean, require_iin=args.iin, check_length=check_length,
-                         schemes=schemes, bin_db=bin_db, lookup=lookup)
+                         schemes=schemes, bin_db=bin_db, lookup=lookup, repository=repository)
         any_valid |= r["valid"]
         if as_json:
             r["pan"] = opts.pan(r["pan"])

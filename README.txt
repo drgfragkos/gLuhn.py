@@ -29,6 +29,13 @@ usage: gLuhn.py  [options] [PAN ...]
   --emv HEX                            -> decode EMV TLV data: tags, AID -> scheme/product,
                                           track 2 equivalent, CVM list, TVR/TSI/AIP/AUC bits
 
+Issuer identification: repository/bin-repository.json (shared by both scripts through
+repository/gluhn_repository.py and repository/GLuhnRepository.psm1) names the issuing bank,
+country, card type and category for 343,063 BINs, e.g. "Visa issued by Barclays Bank PLC,
+United Kingdom". It is used automatically; --repo-list visa GB lists the banks that issue a
+brand in a country, --repo-issuer barclaycard the brands of a bank. See repository/README.md
+for sources and how to rebuild it (python3 repository/build_repository.py).
+
 Full documentation: Docs/User-Guide.html (single file, open it in any browser) built from
 Docs/User-Guide.md with Tools/Build-UserGuide.ps1 (see Docs/guide/README.md).
 
@@ -45,7 +52,11 @@ Options (Python / PowerShell):
        --include GLOB, --exclude GLOB, --no-recursive, --no-archives, --max-file-size MB
        --min-score N            scan: report only hits with confidence score >= N
        --emv HEX / -Emv         decode EMV TLV hex data ('@file' reads a file)
-       --bin-db CSV / -BinDb    CSV BIN/IIN database for issuing bank lookup ('auto' = downloaded file)
+       --repo JSON / -Repo      issuer repository (default repository/bin-repository.json, automatic)
+       --no-repo / -NoRepo      do not use the issuer repository
+       --repo-list BRAND [CC]   banks issuing BRAND [in country CC] (PowerShell: -RepoList visa,GB)
+       --repo-issuer NAME       brands and countries of a bank (name substring)
+       --bin-db CSV / -BinDb    extra CSV BIN/IIN database for issuing bank lookup ('auto' = downloaded file)
        --update-bin-db          download the open binlist-data CSV (about 25 MB) first
        --lookup                 online IIN lookup (binlist.net format); sends only the 8/6-digit IIN
        --lookup-url URL, --lookup-timeout SEC
@@ -77,12 +88,13 @@ Examples:
 A plain PAN is checked with the Luhn formula and the issuer identification number (IIN)
 is looked up in the built-in scheme table:
 
-$ python3 gLuhn.py 4542109540018054
-PAN:          4542 1095 4001 8054  (16 digits)
+$ python3 gLuhn.py 4929401234567881
+PAN:          4929 4012 3456 7881  (16 digits)
 Luhn:         valid
 MII:          4 - Banking and financial (Visa)
-IIN:          454210 / 45421095  (6-digit / 8-digit)
+IIN:          492940 / 49294012  (6-digit / 8-digit)
 Scheme:       Visa  (IIN range 4; length OK)
+Issuer (repo): BARCLAYS BANK PLC | VISA | CREDIT | PREMIER | United Kingdom  [BIN 492940]
 Result:       [+] Valid PAN
 
 Without -i the verdict is Luhn only (as in v0.8), so 1111222233334444 is still "valid".
@@ -283,8 +295,8 @@ Accuracy notes:
 
 
 Tests:
-$ python3 -m unittest discover -s tests -v          (85 tests)
-PS> powershell -ExecutionPolicy Bypass -File tests\gLuhn.Tests.ps1   (225 checks, no Pester)
+$ python3 -m unittest discover -s tests -v          (99 tests)
+PS> powershell -ExecutionPolicy Bypass -File tests\gLuhn.Tests.ps1   (251 checks, no Pester)
 The PowerShell suite starts tests/mock_lookup.py with Python when available to exercise the
 online lookup against a local mock; otherwise those checks are skipped.
 
@@ -294,6 +306,12 @@ $ git clone https://github.com/drgfragkos/gLuhn.py.git
 
 
 Version:
+1.2.0 : 2026/10/07 - Issuer repository: repository/bin-repository.json built from the open
+                     binlist-data set (343,063 BINs, 13,291 issuer names, 199 countries) by
+                     repository/build_repository.py, which also merges extra CSV sources.
+                     Shared lookup modules gluhn_repository.py and GLuhnRepository.psm1;
+                     both scripts print "Issuer (repo)" automatically, fill the issuer
+                     column of scan reports, and answer --repo-list / --repo-issuer.
 1.1.0 : 2026/10/06 - Issuer identification: --lookup (online, IIN only), --update-bin-db /
                      --bin-db auto (offline binlist-data), --iin-table JSON plus
                      Tools/update_iin_table.py. Data discovery: --scan walks folders, opens

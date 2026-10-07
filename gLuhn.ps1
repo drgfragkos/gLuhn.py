@@ -64,6 +64,14 @@
     6-4 (default), 8-4 (PCI DSS v4 for 16+ digit PANs), last4 or full; implies -Mask.
 .PARAMETER Format
     text (default), json, jsonl or csv (csv/jsonl are meant for -Scan).
+.PARAMETER Repo
+    Issuer repository JSON (repository\bin-repository.json); it is used automatically when present.
+.PARAMETER NoRepo
+    Do not use the issuer repository.
+.PARAMETER RepoList
+    List the banks that issue a brand (e.g. visa) optionally in one country (ISO alpha-2): -RepoList visa,GB
+.PARAMETER RepoIssuer
+    List the brands and countries of a bank (name substring) and exit.
 .PARAMETER BinDb
     CSV BIN/IIN database for issuer lookup (e.g. the open binlist-data CSV); 'auto' = the
     file downloaded with -UpdateBinDb (%USERPROFILE%\.gluhn\binlist-data.csv).
@@ -119,6 +127,10 @@ param(
     [switch]$NoArchives,
     [double]$MaxFileSize = 64,
     [int]$MinScore = 0,
+    [string]$Repo,
+    [switch]$NoRepo,
+    [string[]]$RepoList,
+    [string]$RepoIssuer,
     [string]$BinDb,
     [switch]$UpdateBinDb,
     [switch]$Lookup,
@@ -925,6 +937,30 @@ function Find-BinIssuer {
 }
 
 # ---------------------------------------------------------------------------------
+# Issuer repository (repository\bin-repository.json via repository\GLuhnRepository.psm1)
+# ---------------------------------------------------------------------------------
+$script:REPOSITORY_DIR = Join-Path $PSScriptRoot 'repository'
+$script:DEFAULT_REPOSITORY_PATH = Join-Path $script:REPOSITORY_DIR 'bin-repository.json'
+
+function Import-IssuerRepository {
+    # Loads the shared module by path and the JSON; returns the repository object.
+    param([string]$Path = $script:DEFAULT_REPOSITORY_PATH)
+    $module = Join-Path $script:REPOSITORY_DIR 'GLuhnRepository.psm1'
+    if (-not (Test-Path -LiteralPath $module)) { throw "repository module not found: $module" }
+    Import-Module -Name $module -Force -DisableNameChecking -ErrorAction Stop | Out-Null
+    return (Import-BinRepository -Path $Path)
+}
+
+function Get-RepositoryLine {
+    param($Info)
+    $bits = foreach ($k in @('issuer', 'brand', 'type', 'category', 'country')) { if ($Info[$k]) { [string]$Info[$k] } }
+    $txt = $bits -join ' | '
+    if (-not $txt) { $txt = 'no issuer name on record' }
+    return "$txt  [BIN $($Info['range'])]"
+}
+
+
+# ---------------------------------------------------------------------------------
 # Validation of a single PAN
 # ---------------------------------------------------------------------------------
 function ConvertTo-NormalisedPan { param([string]$Text) return ($Text.Trim() -replace '[\s\-\._]', '') }
@@ -1012,13 +1048,13 @@ function Get-MiiInfo {
 
 function Test-Pan {
     # Full assessment of one PAN; returns an ordered hashtable (JSON friendly).
-    param([string]$Pan, [bool]$RequireIin = $false, [bool]$CheckLength = $true, [object[]]$Schemes = $script:SCHEMES, $BinDb = $null, $Lookup = $null)
+    param([string]$Pan, [bool]$RequireIin = $false, [bool]$CheckLength = $true, [object[]]$Schemes = $script:SCHEMES, $BinDb = $null, $Lookup = $null, $Repository = $null)
     $Pan = ConvertTo-NormalisedPan $Pan
     $r = [ordered]@{
         pan = $Pan; length = $Pan.Length; well_formed = $false; luhn = $false; luhn_expected = $true
         mii = $null; iin6 = $null; iin8 = $null
         scheme = $null; scheme_key = $null; scheme_active = $true; scheme_note = ''; iin_range = $null
-        length_ok = $null; expected_lengths = @(); also_matches = @(); issuer = $null
+        length_ok = $null; expected_lengths = @(); also_matches = @(); issuer = $null; repository = $null
         test_card = $null; lookalike = $null; lookup = $null; valid = $false
         reasons = New-Object System.Collections.ArrayList
     }
@@ -1054,6 +1090,7 @@ function Test-Pan {
         $r['also_matches'] = @($also)
     }
     if ($null -ne $BinDb) { $r['issuer'] = Find-BinIssuer -Db $BinDb -Pan $Pan }
+    if ($null -ne $Repository) { $r['repository'] = Find-BinRepositoryIssuer -Repository $Repository -Pan $Pan }
     $r['test_card'] = Test-TestCard $Pan
     $r['lookalike'] = Get-LookalikeHint $Pan
     if ($null -ne $Lookup -and $r['well_formed']) { $r['lookup'] = Invoke-IinLookup -Lookup $Lookup -Pan $Pan }
@@ -1461,7 +1498,7 @@ function Get-HitScore {
 
 function Search-PanInText {
     param([string[]]$Lines, [bool]$RequireIin = $true, [bool]$CheckLength = $true, [object[]]$Schemes = $script:SCHEMES, $BinDb = $null,
-          [int]$MinScore = 0, [string]$Source = '<text>')
+          [int]$MinScore = 0, [string]$Source = '<text>', $Repository = $null)
     $seen = @{}
     $lineno = 0
     foreach ($line in $Lines) {
@@ -1471,7 +1508,7 @@ function Search-PanInText {
             $pan = ConvertTo-NormalisedPan $m.Value
             if ($pan.Length -lt 12 -or $pan.Length -gt $script:PAN_MAX_LEN) { continue }
             if (@($pan.ToCharArray() | Sort-Object -Unique).Count -eq 1) { continue }   # 0000000000000000 and friends
-            $r = Test-Pan -Pan $pan -RequireIin $RequireIin -CheckLength $CheckLength -Schemes $Schemes -BinDb $BinDb
+            $r = Test-Pan -Pan $pan -RequireIin $RequireIin -CheckLength $CheckLength -Schemes $Schemes -BinDb $BinDb -Repository $Repository
             if (-not $r['valid']) { continue }
             $sc = Get-HitScore -Line $line -Start $m.Index -End ($m.Index + $m.Length) -Result $r
             if ($sc['Score'] -lt $MinScore) { continue }
@@ -1833,7 +1870,7 @@ function Get-TlvNodes {
 
 function ConvertFrom-Emv {
     # Decode a hex TLV dump and summarise what matters for card identification.
-    param([string]$Text, [object[]]$Schemes = $script:SCHEMES, $BinDb = $null, [bool]$RequireIin = $false, [bool]$CheckLength = $true, $Lookup = $null)
+    param([string]$Text, [object[]]$Schemes = $script:SCHEMES, $BinDb = $null, [bool]$RequireIin = $false, [bool]$CheckLength = $true, $Lookup = $null, $Repository = $null)
     $data = ConvertFrom-HexString (ConvertTo-CleanHex $Text)
     $nodes = @(ConvertFrom-Tlv -Data $data)
     $s = [ordered]@{ pan = $null; expiry = $null; expiry_status = $null; psn = $null; cardholder = $null; aid = $null; label = $null
@@ -1865,7 +1902,7 @@ function ConvertFrom-Emv {
     if (-not $s['pan'] -and $s['track2']) { $s['pan'] = $s['track2']['pan'] }
     if ($s['track2'] -and -not $s['service_code']) { $s['service_code'] = $s['track2']['service_code'] }
     if ($s['pan']) {
-        $v = Test-Pan -Pan $s['pan'] -RequireIin $RequireIin -CheckLength $CheckLength -Schemes $Schemes -BinDb $BinDb -Lookup $Lookup
+        $v = Test-Pan -Pan $s['pan'] -RequireIin $RequireIin -CheckLength $CheckLength -Schemes $Schemes -BinDb $BinDb -Lookup $Lookup -Repository $Repository
         $s['validation'] = $v
         if ($s['aid'] -and $v['scheme']) {
             $word = ($s['aid']['scheme'] -split ' ')[0].ToLower()
@@ -1933,6 +1970,12 @@ function Write-Validation {
     if ($iss) {
         $bits = foreach ($k in @('issuer', 'brand', 'type', 'category', 'country')) { if ($iss.ContainsKey($k) -and $iss[$k]) { $iss[$k] } }
         Write-Output "Issuer (DB):  $($bits -join ' | ')  [$($iss['iin'])]"
+    }
+    $rp = $R['repository']
+    if ($rp) {
+        Write-Output "Issuer (repo): $(Get-RepositoryLine $rp)"
+        $more = foreach ($k in @('url', 'phone')) { if ($rp[$k]) { $rp[$k] } }
+        if ($more) { Write-Output "              $($more -join ' ')" }
     }
     $lk = $R['lookup']
     if ($lk) {
@@ -2073,6 +2116,7 @@ function Get-ScanRow {
     $iss = $R['issuer']
     $issTxt = ''
     if ($iss) { $issTxt = (@(foreach ($k in @('issuer', 'country')) { if ($iss.ContainsKey($k) -and $iss[$k]) { $iss[$k] } }) -join ' | ') }
+    elseif ($R['repository']) { $rp = $R['repository']; $issTxt = (@(foreach ($k in @('issuer', 'country')) { if ($rp[$k]) { [string]$rp[$k] } }) -join ' | ') }
     $look = ''
     if ($R['lookalike']) { $look = $R['lookalike']['kind'] }
     $sha = ''
@@ -2141,7 +2185,8 @@ function Write-Usage {
     Write-Output ''
     Write-Output 'usage: gLuhn.ps1 [-i] [-NoIin] [-IgnoreLength] [-b BRANDS] [-ActiveOnly] [-NoCatchAll] [-IinTable JSON] [-Max N]'
     Write-Output '                 [-f FILE] [-Scan PATH] [-Emv HEX] [-Include GLOB] [-Exclude GLOB] [-NoRecursive] [-NoArchives]'
-    Write-Output '                 [-MaxFileSize MB] [-MinScore N] [-BinDb CSV|auto] [-UpdateBinDb] [-Lookup] [-LookupUrl URL]'
+    Write-Output '                 [-MaxFileSize MB] [-MinScore N] [-Repo JSON] [-NoRepo] [-RepoList BRAND[,CC]] [-RepoIssuer NAME]'
+    Write-Output '                 [-BinDb CSV|auto] [-UpdateBinDb] [-Lookup] [-LookupUrl URL]'
     Write-Output '                 [-m] [-MaskStyle 6-4|8-4|last4|full] [-Format text|json|jsonl|csv] [-j] [-q] [-ListSchemes] [-Version] [PAN ...]'
     Write-Output ''
     Write-Output '  PAN           Luhn check + scheme identification (add -i to also require a known IIN)'
@@ -2193,6 +2238,41 @@ function Invoke-Main {
         }
         if ($fmt -eq 'text' -and -not $Quiet) { Write-Output "[i] BIN database loaded: $($binDatabase['Rows']) rows from $(Split-Path -Leaf $binPath)" }
     }
+    $repository = $null
+    $repoPath = $Repo
+    if (-not $repoPath -and (Test-Path -LiteralPath $script:DEFAULT_REPOSITORY_PATH)) { $repoPath = $script:DEFAULT_REPOSITORY_PATH }
+    if ($repoPath -and -not $NoRepo) {
+        try { $repository = Import-IssuerRepository -Path $repoPath }
+        catch {
+            if ($Repo) { Write-Output "[-] cannot load issuer repository: $($_.Exception.Message)"; $script:ExitCode = 2; return }
+            Write-Output "[i] issuer repository not loaded: $($_.Exception.Message)"
+        }
+    }
+    if ($RepoList -or $RepoIssuer) {
+        if ($null -eq $repository) { Write-Output '[-] the issuer repository is needed for -RepoList / -RepoIssuer (build it with repository/build_repository.py)'; $script:ExitCode = 2; return }
+        if ($RepoList) {
+            $parts = @(foreach ($x in $RepoList) { foreach ($y in ([string]$x).Split(',')) { if ($y.Trim()) { $y.Trim() } } })
+            $cc = ''
+            if ($parts.Count -gt 1) { $cc = $parts[1] }
+            $rows = @(Get-BinRepositoryIssuers -Repository $repository -Brand $parts[0] -CountryCode $cc)
+        } else { $rows = @(Get-BinRepositoryBrandsForIssuer -Repository $repository -Name $RepoIssuer) }
+        if ($asJson) { Write-Output (ConvertTo-GLuhnJson -InputObject @($rows)) }
+        elseif ($fmt -eq 'csv') {
+            if ($rows.Count -gt 0) {
+                $cols = @($rows[0].Keys)
+                Write-Output (ConvertTo-CsvLine $cols)
+                foreach ($row in $rows) { Write-Output (ConvertTo-CsvLine @(foreach ($c in $cols) { $row[$c] })) }
+            } else { Write-Output 'issuer' }
+        } else {
+            foreach ($row in $rows) {
+                if ($RepoList) { Write-Output ('{0,-3} {1,-45} {2}' -f $row['country_code'], $row['issuer'], [string]$row['url']) }
+                else { Write-Output ('{0,-45} {1,-18} {2}' -f $row['issuer'], $row['brand'], $row['country_code']) }
+            }
+            Write-Output "$($rows.Count) entries"
+        }
+        if ($rows.Count -gt 0) { $script:ExitCode = 0 } else { $script:ExitCode = 1 }
+        return
+    }
     $lookupObj = $null
     if ($Lookup) {
         try { $lookupObj = New-OnlineLookup -UrlTemplate $LookupUrl -Timeout $LookupTimeout }
@@ -2223,7 +2303,7 @@ function Invoke-Main {
     # ---- EMV ------------------------------------------------------------------------
     if ($Emv) {
         $anyInput = $true
-        try { $e = ConvertFrom-Emv -Text $Emv -Schemes $schemes -BinDb $binDatabase -RequireIin $requireIin -CheckLength $checkLength -Lookup $lookupObj }
+        try { $e = ConvertFrom-Emv -Text $Emv -Schemes $schemes -BinDb $binDatabase -RequireIin $requireIin -CheckLength $checkLength -Lookup $lookupObj -Repository $repository }
         catch { Write-Output "[-] cannot decode EMV data: $($_.Exception.Message)"; $script:ExitCode = 1; return }
         $v = $e['summary']['validation']
         if ($v -and $v['valid']) { $anyValid = $true }
@@ -2242,7 +2322,7 @@ function Invoke-Main {
         Get-ScanSource -Path $Scan -Recursive (-not $NoRecursive) -Include $includeGlobs -Exclude $excludeGlobs -MaxBytes $maxBytes -Archives (-not $NoArchives) -Skipped $skipped | ForEach-Object {
             $src = $_
             $sources++
-            Search-PanInText -Lines $src['Lines'] -RequireIin $iinFilter -CheckLength $checkLength -Schemes $schemes -BinDb $binDatabase -MinScore $MinScore -Source $src['Name'] | ForEach-Object {
+            Search-PanInText -Lines $src['Lines'] -RequireIin $iinFilter -CheckLength $checkLength -Schemes $schemes -BinDb $binDatabase -MinScore $MinScore -Source $src['Name'] -Repository $repository | ForEach-Object {
                 $r = $_
                 $hits++
                 $anyValid = $true
@@ -2290,7 +2370,7 @@ function Invoke-Main {
                 if ($opts['Masked']) { $shownIn = '<track data>' }
                 Write-Output "[-] $($_.Exception.Message): $shownIn"; continue
             }
-            $v = Test-Pan -Pan $t['pan'] -RequireIin $requireIin -CheckLength $checkLength -Schemes $schemes -BinDb $binDatabase -Lookup $lookupObj
+            $v = Test-Pan -Pan $t['pan'] -RequireIin $requireIin -CheckLength $checkLength -Schemes $schemes -BinDb $binDatabase -Lookup $lookupObj -Repository $repository
             if ($v['valid']) { $anyValid = $true }
             if ($asJson) {
                 if ($opts['Masked']) { $t['pan'] = Format-PanForOutput -Pan $v['pan'] -Opts $opts; $v['pan'] = $t['pan']; $t['discretionary'] = $null; $t['discretionary_hints'] = $null; $t['input'] = '<masked>' }
@@ -2329,10 +2409,10 @@ function Invoke-Main {
                         $label = 'unknown scheme'
                         if ($m.Count -gt 0) { $label = $m[0]['Scheme']['Name'] }
                         $extra = ''
-                        if ($null -ne $binDatabase) {
-                            $iss = Find-BinIssuer -Db $binDatabase -Pan $p
-                            if ($iss) { $bits = foreach ($k in @('issuer', 'country')) { if ($iss[$k]) { $iss[$k] } }; $extra = "  [$($bits -join ' | ')]" }
-                        }
+                        $iss = $null
+                        if ($null -ne $binDatabase) { $iss = Find-BinIssuer -Db $binDatabase -Pan $p }
+                        if ($null -eq $iss -and $null -ne $repository) { $iss = Find-BinRepositoryIssuer -Repository $repository -Pan $p }
+                        if ($iss) { $bits = foreach ($k in @('issuer', 'country')) { if ($iss[$k]) { [string]$iss[$k] } }; $extra = "  [$($bits -join ' | ')]" }
                         if (Test-TestCard $p) { $extra += '  (test number)' }
                         Write-Output ('[+] Valid PAN  {0,-20} {1}{2}' -f (Format-PanForOutput -Pan $p -Opts $opts), $label, $extra)
                     }
@@ -2343,7 +2423,7 @@ function Invoke-Main {
         }
 
         # Plain validation
-        $r = Test-Pan -Pan $clean -RequireIin $requireIin -CheckLength $checkLength -Schemes $schemes -BinDb $binDatabase -Lookup $lookupObj
+        $r = Test-Pan -Pan $clean -RequireIin $requireIin -CheckLength $checkLength -Schemes $schemes -BinDb $binDatabase -Lookup $lookupObj -Repository $repository
         if ($r['valid']) { $anyValid = $true }
         if ($asJson) { $r['pan'] = Format-PanForOutput -Pan $r['pan'] -Opts $opts; & $emit $r }
         elseif ($fmt -eq 'csv') { Write-Output ('{0},{1},{2},{3}' -f (Format-PanForOutput -Pan $r['pan'] -Opts $opts), $r['valid'], [string]$r['scheme'], [string]$r['iin_range']) }
