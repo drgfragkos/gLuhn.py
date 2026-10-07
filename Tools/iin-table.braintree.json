@@ -1,0 +1,392 @@
+{
+  "generated": "2026-10-06",
+  "source": "https://raw.githubusercontent.com/braintree/credit-card-type/main/src/lib/card-types.ts",
+  "licence": "braintree/credit-card-type is MIT licensed",
+  "replace": false,
+  "schemes": [
+    {
+      "key": "visa",
+      "name": "Visa",
+      "ranges": [
+        "4"
+      ],
+      "catch_all": [],
+      "lengths": [
+        16,
+        18,
+        19
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "mastercard",
+      "name": "Mastercard",
+      "ranges": [
+        "51-55",
+        "2221-2229",
+        "223-229",
+        "23-26",
+        "270-271",
+        "2720"
+      ],
+      "catch_all": [],
+      "lengths": [
+        16
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "amex",
+      "name": "American Express",
+      "ranges": [
+        "34",
+        "37"
+      ],
+      "catch_all": [],
+      "lengths": [
+        15
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "diners",
+      "name": "Diners Club",
+      "ranges": [
+        "300-305",
+        "36",
+        "38",
+        "39"
+      ],
+      "catch_all": [],
+      "lengths": [
+        14,
+        16,
+        19
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "troy",
+      "name": "Troy",
+      "ranges": [
+        "9792",
+        "650052",
+        "650082-650083",
+        "650092",
+        "650161",
+        "650170",
+        "650173",
+        "650175",
+        "650268",
+        "650271",
+        "650273-650274",
+        "650456-650457",
+        "650836",
+        "650846-650850",
+        "650923",
+        "650987",
+        "650990",
+        "654997",
+        "657366",
+        "657998",
+        "658758",
+        "658767-658768",
+        "65083700-65083704",
+        "65085800-65085804",
+        "65085900-65085901",
+        "65086000",
+        "65086100-65086105",
+        "65086200-65086203",
+        "65875000-65875003",
+        "65875009",
+        "65875101-65875104",
+        "65875200",
+        "65875501",
+        "65875601",
+        "65875900",
+        "65876000-65876002",
+        "65876100-65876103",
+        "65876110",
+        "65876115-65876116",
+        "65876200-65876201",
+        "65876500",
+        "65876504-65876505",
+        "65876600-65876602",
+        "65877100-65877101",
+        "65877600-65877602",
+        "65877700",
+        "65877801-65877802",
+        "65878200-65878202",
+        "65878300-65878311",
+        "65878400-65878405",
+        "65878500-65878505",
+        "65878600-65878601",
+        "65879800",
+        "65880800",
+        "65880900"
+      ],
+      "catch_all": [],
+      "lengths": [
+        16
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "discover",
+      "name": "Discover",
+      "ranges": [
+        "6011",
+        "644-649",
+        "65"
+      ],
+      "catch_all": [],
+      "lengths": [
+        16,
+        19
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "jcb",
+      "name": "JCB",
+      "ranges": [
+        "2131",
+        "1800",
+        "3528-3589"
+      ],
+      "catch_all": [],
+      "lengths": [
+        16,
+        17,
+        18,
+        19
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "unionpay",
+      "name": "UnionPay",
+      "ranges": [
+        "620",
+        "62100-62182",
+        "62184-62187",
+        "62185-62197",
+        "62200-62205",
+        "622010-622999",
+        "622018",
+        "62207-62209",
+        "623-626",
+        "6270",
+        "6272",
+        "6276",
+        "627700-627779",
+        "627781-627799",
+        "6282-6289",
+        "6291",
+        "6292",
+        "810",
+        "8110-8131",
+        "8132-8151",
+        "8152-8163",
+        "8164-8171"
+      ],
+      "catch_all": [],
+      "lengths": [
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "maestro",
+      "name": "Maestro",
+      "ranges": [
+        "493698",
+        "500000-504174",
+        "504176-506698",
+        "506779-508999",
+        "56-59"
+      ],
+      "catch_all": [
+        "63",
+        "67",
+        "6"
+      ],
+      "lengths": [
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "elo",
+      "name": "Elo",
+      "ranges": [
+        "401178",
+        "401179",
+        "438935",
+        "457631",
+        "457632",
+        "431274",
+        "451416",
+        "457393",
+        "504175",
+        "506699-506778",
+        "509000-509999",
+        "627780",
+        "636297",
+        "636368",
+        "650031-650033",
+        "650035-650051",
+        "650057-650081",
+        "650405-650439",
+        "650485-650538",
+        "650541-650598",
+        "650700-650718",
+        "650720-650727",
+        "650901-650978",
+        "651652-651679",
+        "651680-651704",
+        "655000-655019",
+        "655021-655058"
+      ],
+      "catch_all": [],
+      "lengths": [
+        16
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "mir",
+      "name": "Mir",
+      "ranges": [
+        "2200-2204"
+      ],
+      "catch_all": [],
+      "lengths": [
+        16,
+        17,
+        18,
+        19
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "hiper",
+      "name": "Hiper",
+      "ranges": [
+        "637095",
+        "63737423",
+        "63743358",
+        "637568",
+        "637599",
+        "637609",
+        "637612"
+      ],
+      "catch_all": [],
+      "lengths": [
+        16
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "hipercard",
+      "name": "Hipercard",
+      "ranges": [
+        "606282"
+      ],
+      "catch_all": [],
+      "lengths": [
+        16
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "naranja",
+      "name": "Naranja",
+      "ranges": [
+        "589562",
+        "402918",
+        "527572"
+      ],
+      "catch_all": [],
+      "lengths": [
+        16
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    },
+    {
+      "key": "verve",
+      "name": "Verve",
+      "ranges": [
+        "506099-506127",
+        "506129",
+        "506133-506150",
+        "506158-506163",
+        "506166",
+        "506168",
+        "506170",
+        "506173",
+        "506176-506180",
+        "506184",
+        "506187-506188",
+        "506191",
+        "506195",
+        "506197",
+        "507865",
+        "507866",
+        "507868-507877",
+        "507880-507888",
+        "507900",
+        "507941"
+      ],
+      "catch_all": [],
+      "lengths": [
+        16,
+        18,
+        19
+      ],
+      "luhn": true,
+      "active": true,
+      "note": "ranges from braintree/credit-card-type"
+    }
+  ]
+}

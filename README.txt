@@ -3,6 +3,8 @@
 You may modify, reuse and distribute the code freely as long as it is referenced back
 to the author using the following line: ..based on gLuhn.py by @drgfragkos
 
+gLuhn v1.1 - Check/Generate PAN (Luhn), identify IIN/scheme and issuer, scan files, decode track
+             and EMV data (c)gfragkos 2013-2026
 gLuhn v1.0 - Check/Generate PAN (Luhn), identify IIN/scheme, decode track data (c)gfragkos 2013-2026
 gLuhn.py v0.8 - Check/Generate PAN based on Luhn algorithm, validate IIN (c)gfragkos 2020
 gLuhn.py v0.7 - Check/Generate PAN based on Luhn algorithm (c)gfragkos 2013
@@ -10,16 +12,32 @@ gLuhn.py v0.7 - Check/Generate PAN based on Luhn algorithm (c)gfragkos 2013
 Two implementations with identical behaviour and output:
 
   gLuhn.py   Python 3.6+  (standard library only; numpy is no longer needed)
-  gLuhn.ps1  Windows PowerShell 5.1 and PowerShell 7
+  gLuhn.ps1  one script for Windows PowerShell 5.1 and PowerShell 7+ (Windows, Linux, macOS);
+             it detects the engine it runs under and adapts (JSON escaping, text encodings)
 
 usage: gLuhn.py  [options] [PAN ...]
        gLuhn.ps1 [options] [PAN ...]
 
-  PAN            digits only           -> Luhn check + scheme identification
+  PAN            digits only           -> Luhn check + scheme identification, test number and
+                                          IMEI/ICCID look-alike labels, optional issuer lookup
   PAN with '?'   e.g. 4542109540?18054 -> generate every valid combination (IIN filtered)
   track data     ;4542...=2512201...?  -> parse track 1 / track 2 / EMV tag 57, decode the
-                                          service code and validate the PAN
-  --scan FILE                          -> find candidate PANs in any text file
+                                          service code, expiry sanity, PVKI/PVV/CVV1 layout
+  --scan PATH                          -> find candidate PANs in files, folders (recursive),
+                                          ZIP/Office archives, PDFs, UTF-16 files; confidence
+                                          score per hit; text, CSV or JSON Lines report
+  --emv HEX                            -> decode EMV TLV data: tags, AID -> scheme/product,
+                                          track 2 equivalent, CVM list, TVR/TSI/AIP/AUC bits
+
+Issuer identification: repository/bin-repository.json (shared by both scripts through
+repository/gluhn_repository.py and repository/GLuhnRepository.psm1) names the issuing bank,
+country, card type and category for 343,063 BINs, e.g. "Visa issued by Barclays Bank PLC,
+United Kingdom". It is used automatically; --repo-list visa GB lists the banks that issue a
+brand in a country, --repo-issuer barclaycard the brands of a bank. See repository/README.md
+for sources and how to rebuild it (python3 repository/build_repository.py).
+
+Full documentation: Docs/User-Guide.html (single file, open it in any browser) built from
+Docs/User-Guide.md with Tools/Build-UserGuide.ps1 (see Docs/guide/README.md).
 
 Options (Python / PowerShell):
   -i,  --iin / -Iin             validation: also require a known IIN/scheme and a plausible length
@@ -28,11 +46,24 @@ Options (Python / PowerShell):
   -b,  --brand BRANDS / -Brand  restrict matching to these schemes (comma separated, e.g. visa,mastercard)
        --active-only            ignore defunct schemes (Laser, Solo, Switch, Bankcard, enRoute, ...)
        --no-catch-all           ignore the broad Maestro catch-all ranges 50 and 56-69
+       --iin-table JSON         extend or override the built-in scheme table (see User Guide UC9)
   -f,  --file FILE / -File      read one PAN / pattern / track per line ('-' = stdin, '#' = comment)
-       --scan FILE / -Scan      scan a text file for candidate PANs ('-' = stdin)
-       --bin-db CSV / -BinDb    CSV BIN/IIN database for issuing bank lookup (see below)
+       --scan PATH / -Scan      scan a file, folder, archive or '-' (stdin) for candidate PANs
+       --include GLOB, --exclude GLOB, --no-recursive, --no-archives, --max-file-size MB
+       --min-score N            scan: report only hits with confidence score >= N
+       --emv HEX / -Emv         decode EMV TLV hex data ('@file' reads a file)
+       --repo JSON / -Repo      issuer repository (default repository/bin-repository.json, automatic)
+       --no-repo / -NoRepo      do not use the issuer repository
+       --repo-list BRAND [CC]   banks issuing BRAND [in country CC] (PowerShell: -RepoList visa,GB)
+       --repo-issuer NAME       brands and countries of a bank (name substring)
+       --bin-db CSV / -BinDb    extra CSV BIN/IIN database for issuing bank lookup ('auto' = downloaded file)
+       --update-bin-db          download the open binlist-data CSV (about 25 MB) first
+       --lookup                 online IIN lookup (binlist.net format); sends only the 8/6-digit IIN
+       --lookup-url URL, --lookup-timeout SEC
        --max N / -Max           refuse generation above N Luhn candidates (default 1e7 / 1e6)
   -m,  --mask / -Mask           mask PANs in the output (first 6 / last 4, PCI DSS style)
+       --mask-style STYLE       6-4 (default), 8-4 (PCI DSS v4, 16+ digits), last4, full
+       --format FMT             text, json, jsonl, csv
   -j,  --json / -Json           JSON output (one object, or an array for several inputs)
   -q,  --quiet / -Quiet         one line per PAN
        --list-schemes           print the built-in IIN table and the MII table
@@ -57,12 +88,13 @@ Examples:
 A plain PAN is checked with the Luhn formula and the issuer identification number (IIN)
 is looked up in the built-in scheme table:
 
-$ python3 gLuhn.py 4542109540018054
-PAN:          4542 1095 4001 8054  (16 digits)
+$ python3 gLuhn.py 4929401234567881
+PAN:          4929 4012 3456 7881  (16 digits)
 Luhn:         valid
 MII:          4 - Banking and financial (Visa)
-IIN:          454210 / 45421095  (6-digit / 8-digit)
+IIN:          492940 / 49294012  (6-digit / 8-digit)
 Scheme:       Visa  (IIN range 4; length OK)
+Issuer (repo): BARCLAYS BANK PLC | VISA | CREDIT | PREMIER | United Kingdom  [BIN 492940]
 Result:       [+] Valid PAN
 
 Without -i the verdict is Luhn only (as in v0.8), so 1111222233334444 is still "valid".
@@ -122,12 +154,25 @@ PAN:          4542 1095 4001 8054  (16 digits)
 ...
 
 >> Data discovery >>>>>>>>>>>>>>>>>>>>>>>>>>
-$ python3 gLuhn.py --scan dump.txt --mask
-[+] line 2      454210******8054         Visa
-[+] line 4      543210******5554         Mastercard
-[+] line 4      543210******5554         Mastercard  (duplicate)
+$ python3 gLuhn.py --scan ./exports --mask
+[+] HIGH    80  454210******8054         Visa                         exports/orders.txt:2:7
+    grouped digits, card keyword nearby, expiry nearby (possible SAD)
+[+] LOW     15  424242******4242         Visa                         exports/dev/notes.log:1:6
+    known test number (Stripe)
 
-Total candidate PANs found: 3
+Scanned 5 source(s); candidate PANs found: 2
+
+$ python3 gLuhn.py --scan ./exports --format csv --mask-style 8-4 --bin-db auto > findings.csv
+
+>> EMV chip data >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+$ python3 gLuhn.py --emv 5A0845421095400180545F24032512315F3401014F07A0000000031010
+EMV TLV:      26 bytes, 4 top-level objects
+5A       Application PAN                              len   8  4542109540018054
+5F24     Application Expiration Date                  len   3  2025-12-31
+5F34     Application PAN Sequence Number              len   1  1
+4F       Application Identifier (AID)                 len   7  A0000000031010
+           - Visa: Visa credit / debit
+...
 
 >> Issuing bank lookup (optional BIN database) >>
 The scheme table identifies the network. To see the issuing bank, country and card type
@@ -152,6 +197,10 @@ PS> Get-Content pans.txt | .\gLuhn.ps1 -f - -q
 PS> Get-Help .\gLuhn.ps1 -Detailed
 
 (If scripts are blocked: powershell -ExecutionPolicy Bypass -File .\gLuhn.ps1 ...)
+.\gLuhn.ps1 -Version prints which engine ran it. Note for automation: when stdin is
+redirected, the PowerShell host feeds it to the script as pipeline input and waits for
+end-of-file, so give scheduled/CI runs an explicit "< NUL" (or "< /dev/null") unless
+you really pipe PANs in with -f -.
 
 
 =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
@@ -246,8 +295,10 @@ Accuracy notes:
 
 
 Tests:
-$ python3 -m unittest discover -s tests -v
-PS> powershell -ExecutionPolicy Bypass -File tests\gLuhn.Tests.ps1
+$ python3 -m unittest discover -s tests -v          (99 tests)
+PS> powershell -ExecutionPolicy Bypass -File tests\gLuhn.Tests.ps1   (251 checks, no Pester)
+The PowerShell suite starts tests/mock_lookup.py with Python when available to exercise the
+online lookup against a local mock; otherwise those checks are skipped.
 
 
 Download:
@@ -255,6 +306,23 @@ $ git clone https://github.com/drgfragkos/gLuhn.py.git
 
 
 Version:
+1.2.0 : 2026/10/07 - Issuer repository: repository/bin-repository.json built from the open
+                     binlist-data set (343,063 BINs, 13,291 issuer names, 199 countries) by
+                     repository/build_repository.py, which also merges extra CSV sources.
+                     Shared lookup modules gluhn_repository.py and GLuhnRepository.psm1;
+                     both scripts print "Issuer (repo)" automatically, fill the issuer
+                     column of scan reports, and answer --repo-list / --repo-issuer.
+1.1.0 : 2026/10/06 - Issuer identification: --lookup (online, IIN only), --update-bin-db /
+                     --bin-db auto (offline binlist-data), --iin-table JSON plus
+                     Tools/update_iin_table.py. Data discovery: --scan walks folders, opens
+                     ZIP/Office archives, PDFs (best effort), UTF-16 and binary files; every
+                     hit gets a confidence score with signals; --format csv/jsonl with file
+                     hashes; --include/--exclude/--min-score. Recognises published test card
+                     numbers and IMEI/ICCID look-alikes. EMV TLV decoder (--emv) with tag
+                     names, AID registry, CVM/TVR/TSI/AIP/AUC bit decoding. Track data:
+                     expiry sanity, PVKI/PVV/CVV1 layout, SAD warning. --mask-style 6-4,
+                     8-4, last4, full. Same features in gLuhn.ps1 (5.1 and 7+). Single-file
+                     HTML user guide in Docs/.
 1.0.0 : 2026/10/06 - Python 3 rewrite, no numpy. Done the to-do items: -i applies the IIN
                      check to plain validation, and every PAN is now identified (scheme,
                      IIN range, MII, length rule, defunct schemes, optional BIN database
@@ -272,7 +340,7 @@ Version:
 
 Dependencies:
 Python 3.6 or newer, standard library only.    $ python3 --version
-Windows PowerShell 5.1 (built into Windows) or PowerShell 7.
+Windows PowerShell 5.1 (built into Windows) or PowerShell 7+ (tested on 7.4).
 
 
 ##                                                                                        ##
