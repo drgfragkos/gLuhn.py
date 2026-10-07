@@ -9,7 +9,7 @@ The file is shared by both implementations through two small modules in this fol
 
 | File | Purpose |
 |---|---|
-| `bin-repository.json` | the data (format `gluhn-bin-repository/1`, about 4.7 MB) |
+| `bin-repository.json` | the data (format `gluhn-bin-repository/1`, about 7.4 MB) |
 | `build_repository.py` | builds the JSON from the sources below (Python 3, standard library) |
 | `gluhn_repository.py` | Python lookup module, used by `gLuhn.py`; also a small CLI |
 | `GLuhnRepository.psm1` | PowerShell lookup module, used by `gLuhn.ps1` (5.1 and 7+) |
@@ -42,28 +42,40 @@ Scan reports (`--format csv` / `jsonl`) fill their issuer column from the reposi
 
 ## Sources and how to rebuild
 
-1. **binlist-data** (default): the open BIN list at https://github.com/iannuttall/binlist-data,
-   343,063 six and eight digit BINs with brand, type, category, issuer, country, bank URL and
-   phone. About half of the rows carry no bank name but still give brand, type and country.
-2. **Any extra CSV** (`--source`, repeatable): a BIN table you exported yourself, for example
-   the per-brand issuer lists published at https://www.creditcardvalidator.org/visa (and
-   `/mastercard`, `/amex`, `/unionpay`, `/diners`, `/discover`), or a commercial table. Columns
-   are detected by name (`bin`/`iin`/`prefix`, optional `iin_end`, `brand`/`scheme`, `type`,
-   `category`, `issuer`/`bank`, `alpha_2`/`country_code`, `country`, `bank_url`, `bank_phone`),
-   the delimiter is sniffed, and later sources override earlier ones BIN by BIN.
+All sources are open data. The builder applies them in the order given; later sources override
+earlier ones BIN by BIN, and an eight digit entry always beats a six digit one at lookup time.
+
+| Name | What it is | Licence | Default |
+|---|---|---|---|
+| `binlistio` | binlist.io merged BIN list, https://github.com/Techbuddie-Solutions/binlist-data : 458,051 six digit BINs, a deterministic merge of iannuttall/binlist-data (2020) and venelinkochev/bin-list-data (February 2025), refreshed September 2026 | CC BY 4.0 | yes |
+| `openbiin` | OpenBIIN community database, https://github.com/Wayproyect/openbiin : BIN6 plus two digit sub-ranges, i.e. eight digit precision, split into 100 CSV files | GPL-3.0 | yes |
+| `venelin` | venelinkochev/bin-list-data : 374,788 BINs, February 2025 | CC BY 4.0 | no |
+| `iannuttall` | iannuttall/binlist-data : 343,063 BINs, December 2020, archived | CC BY 4.0 | no |
+| `binlistnet` | binlist/data `ranges.csv` : older binlist.net export, 5,805 scheme level rows | binlist.net open data | no |
+| `--source FILE` | any CSV of your own, for example the per-brand issuer lists published at https://www.creditcardvalidator.org/visa (and `/mastercard`, `/amex`, `/unionpay`, `/diners`, `/discover`) exported to CSV, or a commercial table | yours | no |
+
+Columns are detected by name (`bin`/`bin6`/`iin`/`iin_start`/`prefix`, optional `iin_end`/`bin_end`
+or OpenBIIN `Ranges`, `brand`/`scheme`, `type`, `category`, `issuer`/`bank`/`bank_name`,
+`alpha_2`/`isoCode2`/`country`, `bank_url`/`issuer_url`, `bank_phone`/`issuer_phone`); the delimiter is
+sniffed; brand names and country names are normalised so the sources agree with each other.
 
 ```bash
-python3 repository/build_repository.py                         # download binlist-data, write the JSON
-python3 repository/build_repository.py --binlist ~/.gluhn/binlist-data.csv
+python3 repository/build_repository.py                               # binlistio + openbiin, downloaded
+python3 repository/build_repository.py --sources iannuttall,venelin,binlistio,openbiin
+python3 repository/build_repository.py --local binlistio=bins.csv --local openbiin=./openbiin/functions/data
 python3 repository/build_repository.py --source ccv-visa.csv --source ccv-mastercard.csv
+python3 repository/build_repository.py --sources none --source only-this.csv
 ```
 
-The builder merges consecutive BINs with identical attributes into ranges (343,063 BINs become
-about 122,000 ranges), normalises brand names (`AMEX`, `MASTER CARD`, `CHINA UNION PAY` and
-friends), and writes a lookup-ready layout. Rebuilding is a data refresh; no code changes.
+The builder merges consecutive BINs with identical attributes into ranges, normalises brand names
+(`AMEX`, `MASTER CARD`, `CHINA UNION PAY`, `NSPK MIR` and friends), writes a lookup-ready layout
+and records every source with its row count and licence in the JSON. Rebuilding is a data
+refresh; no code changes.
 
-The jQuery-CreditCardValidator project was reviewed as a candidate source: it only contains
-card-type prefix patterns, no issuing banks, so it is not used.
+Sources that were reviewed and not used: the jQuery-CreditCardValidator project (card-type
+prefix patterns only, no banks) and commercial databases such as BinBase (3.3 million records
+with 8 to 11 digit precision, licensed, not redistributable). Card schemes do not publish their
+BIN tables; the ISO register of IINs is not public either.
 
 ## Format
 
@@ -71,8 +83,9 @@ card-type prefix patterns, no issuing banks, so it is not used.
 {
   "format": "gluhn-bin-repository/1",
   "generated": "2026-10-07",
-  "sources": [{"name": "binlist-data (...)", "rows": 343063}],
-  "counts": {"bins": 343063, "ranges": 122307, "issuers": 13291, "countries": 199, "brands": 25},
+  "sources": [{"name": "binlistio (https://github.com/Techbuddie-Solutions/binlist-data, CC BY 4.0)", "rows": 458051},
+              {"name": "openbiin (https://github.com/Wayproyect/openbiin, GPL-3.0)", "rows": 381892}],
+  "counts": {"bins": 590199, "ranges": 195767, "issuers": 24260, "countries": 226, "brands": 87},
   "brands": ["VISA", "MASTERCARD", "..."],
   "types": ["", "CREDIT", "DEBIT", "..."],
   "categories": ["", "CLASSIC", "GOLD", "..."],

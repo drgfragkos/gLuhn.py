@@ -47,7 +47,7 @@ run may take a second longer while the scheme table is loaded.
 #### What is checked
 
 1. The checksum (Luhn mod 10).
-2. The issuer range, when `-Iin` is given.
+2. The issuer range, when `-IIN` is given.
 3. The length allowed for the detected scheme.
 
 ## 2. Installation

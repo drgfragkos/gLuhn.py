@@ -20,9 +20,9 @@
 
 .PARAMETER PAN
     One or more PANs, PAN patterns (digits and '?') or track strings.
-.PARAMETER Iin
+.PARAMETER IIN
     (-i) Validation: also require a known IIN/scheme and a plausible length.
-.PARAMETER NoIin
+.PARAMETER NoIIN
     Generation / scan: do not filter candidates by IIN/scheme (Luhn only).
 .PARAMETER IgnoreLength
     Do not treat a scheme length mismatch as a failure.
@@ -112,8 +112,8 @@
 param(
     [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
     [string[]]$PAN,
-    [Alias('i')][switch]$Iin,
-    [switch]$NoIin,
+    [Alias('i')][switch]$IIN,
+    [switch]$NoIIN,
     [switch]$IgnoreLength,
     [Alias('b')][string[]]$Brand,
     [switch]$ActiveOnly,
@@ -259,22 +259,29 @@ $script:TEST_CARD_NUMBERS = @{
     '2222400070000005' = 'Adyen'
     '2222420000001113' = 'Mastercard'
     '2222630000001125' = 'Mastercard'
-    '2223000048400011' = 'Braintree'
-    '2223003122003222' = 'scheme documentation'
+    '2223000000000007' = 'Mastercard'
+    '2223000000000023' = 'Mastercard'
+    '2223000048400011' = 'Mastercard'
+    '2223000048410010' = 'Mastercard'
+    '2223003122003222' = 'Mastercard'
     '3056930009020004' = 'Stripe'
-    '30569309025904' = 'scheme documentation'
-    '3528000700000000' = 'Worldpay'
-    '3530111333300000' = 'scheme documentation'
-    '3566002020360505' = 'scheme documentation'
+    '30569309025904' = 'Diners Club'
+    '3528000700000000' = 'JCB'
+    '3530111333300000' = 'JCB'
+    '3566002020360505' = 'JCB'
     '3569990010095841' = 'Adyen'
-    '36227206271667' = 'Stripe'
+    '36227206271667' = 'Diners Club'
     '36259600000004' = 'Braintree'
-    '36700102000000' = 'Worldpay'
+    '36700102000000' = 'Diners Club'
     '370000000000002' = 'Adyen'
-    '371449635398431' = 'scheme documentation'
-    '378282246310005' = 'scheme documentation'
-    '378734493671000' = 'scheme documentation'
-    '38520000023237' = 'scheme documentation'
+    '371449635398431' = 'American Express'
+    '371881127160004' = 'American Express'
+    '371881245560002' = 'American Express'
+    '371881634498004' = 'American Express'
+    '371881911767006' = 'American Express'
+    '378282246310005' = 'American Express'
+    '378734493671000' = 'American Express'
+    '38520000023237' = 'Diners Club'
     '4000000000000002' = 'Stripe'
     '4000000000003220' = 'Stripe'
     '4000000000009995' = 'Stripe'
@@ -284,46 +291,54 @@ $script:TEST_CARD_NUMBERS = @{
     '4005519200000004' = 'Braintree'
     '4007702835532454' = 'Visa'
     '4009348888881881' = 'Braintree'
-    '4012000033330026' = 'Braintree'
+    '4012000033330026' = 'Visa'
     '4012000077777777' = 'Braintree'
-    '4012888888881881' = 'scheme documentation'
-    '4111111111111111' = 'scheme documentation'
+    '4012888888881881' = 'Visa'
+    '4111111111111111' = 'Visa'
     '4111111145551142' = 'Adyen'
     '4166676667666746' = 'Adyen'
     '4217651111111119' = 'Braintree'
-    '4222222222222' = 'scheme documentation'
+    '4222222222222' = 'Visa'
     '4242424242424242' = 'Stripe'
     '4263982640269299' = 'Visa'
-    '4444333322221111' = 'Worldpay'
-    '4462030000000000' = 'Worldpay'
-    '4484070000000000' = 'Worldpay'
+    '4444333322221111' = 'Visa'
+    '4462030000000000' = 'Visa'
+    '4484070000000000' = 'Visa'
     '4500600000000061' = 'Braintree'
+    '4508750015741019' = 'Visa'
     '4646464646464644' = 'Adyen'
     '4911830000000' = 'Worldpay'
     '4917484589897107' = 'Visa'
-    '4917610000000000' = 'Worldpay'
+    '4917610000000000' = 'Visa'
     '4988438843884305' = 'Adyen'
-    '5019717010103742' = 'scheme documentation'
+    '5019717010103742' = 'Dankort'
     '5100290029002909' = 'Adyen'
-    '5105105105105100' = 'scheme documentation'
+    '5105105105105100' = 'Mastercard'
+    '5111111111111118' = 'Mastercard'
+    '5123450000000008' = 'Mastercard'
     '5200828282828210' = 'Stripe'
     '5425233430109903' = 'Mastercard'
-    '5454545454545454' = 'Worldpay'
+    '5454545454545454' = 'Mastercard'
     '5500000000000004' = 'Adyen'
     '5555341244441115' = 'Adyen'
-    '5555555555554444' = 'scheme documentation'
+    '5555555555554444' = 'Mastercard'
     '5577000055770004' = 'Adyen'
-    '6011000990139424' = 'scheme documentation'
-    '6011111111111117' = 'scheme documentation'
-    '6011601160116611' = 'Adyen'
+    '6011000990139424' = 'Discover'
+    '6011000991300009' = 'Discover'
+    '6011003179988686' = 'Discover'
+    '6011111111111117' = 'Discover'
+    '6011601160116611' = 'Discover'
+    '6011963280099774' = 'Discover'
     '6011981111111113' = 'Stripe'
-    '6200000000000005' = 'scheme documentation'
-    '6304000000000000' = 'scheme documentation'
+    '6200000000000005' = 'UnionPay'
+    '6200000000000047' = 'UnionPay'
+    '6205500000000000004' = 'UnionPay'
+    '6304000000000000' = 'Maestro'
     '6555900000604105' = 'Stripe'
     '6703444444444449' = 'Adyen'
-    '6759649826438453' = 'scheme documentation'
+    '6759649826438453' = 'Maestro'
     '6771830000000000006' = 'Adyen'
-    '6799990100000000019' = 'Worldpay'
+    '6799990100000000019' = 'Maestro'
 }
 $script:IMEI_TAC_PREFIXES = @('01', '35', '86', '99', '44', '45', '49', '50', '51', '52', '53', '54', '33')
 # tag -> @(name, format)
@@ -1361,8 +1376,8 @@ function New-OnlineLookup {
 
 function Invoke-LookupRequest {
     # Returns @{ Data = <object or $null>; Error = <string or $null> }
-    param($Lookup, [string]$Iin)
-    $url = $Lookup['UrlTemplate'].Replace('{iin}', $Iin)
+    param($Lookup, [string]$IIN)
+    $url = $Lookup['UrlTemplate'].Replace('{iin}', $IIN)
     $Lookup['Requests']++
     try {
         $resp = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec $Lookup['Timeout'] `
@@ -1404,7 +1419,7 @@ function Invoke-IinLookup {
         if ($Pan.Length -lt $n) { continue }
         $iin = $Pan.Substring(0, $n)
         if ($Lookup['Cache'].ContainsKey($iin)) { return $Lookup['Cache'][$iin] }
-        $resp = Invoke-LookupRequest -Lookup $Lookup -Iin $iin
+        $resp = Invoke-LookupRequest -Lookup $Lookup -IIN $iin
         if ($null -ne $resp['Data']) {
             $result = ConvertTo-FlatLookup $resp['Data']
             $result['iin'] = $iin; $result['source'] = $Lookup['Source']
@@ -2183,7 +2198,7 @@ function ConvertTo-GLuhnJson {
 function Write-Usage {
     Write-Output $script:BANNER
     Write-Output ''
-    Write-Output 'usage: gLuhn.ps1 [-i] [-NoIin] [-IgnoreLength] [-b BRANDS] [-ActiveOnly] [-NoCatchAll] [-IinTable JSON] [-Max N]'
+    Write-Output 'usage: gLuhn.ps1 [-i] [-NoIIN] [-IgnoreLength] [-b BRANDS] [-ActiveOnly] [-NoCatchAll] [-IinTable JSON] [-Max N]'
     Write-Output '                 [-f FILE] [-Scan PATH] [-Emv HEX] [-Include GLOB] [-Exclude GLOB] [-NoRecursive] [-NoArchives]'
     Write-Output '                 [-MaxFileSize MB] [-MinScore N] [-Repo JSON] [-NoRepo] [-RepoList BRAND[,CC]] [-RepoIssuer NAME]'
     Write-Output '                 [-BinDb CSV|auto] [-UpdateBinDb] [-Lookup] [-LookupUrl URL]'
@@ -2280,8 +2295,8 @@ function Invoke-Main {
         if ($fmt -eq 'text' -and -not $Quiet) { Write-Output "[i] online lookup enabled: only the IIN is sent to $($lookupObj['Source'])" }
     }
     $checkLength = -not $IgnoreLength
-    $requireIin = [bool]$Iin
-    $iinFilter = -not $NoIin
+    $requireIin = [bool]$IIN
+    $iinFilter = -not $NoIIN
     # -Include / -Exclude accept PowerShell arrays (-Exclude *.bak,sub) and comma separated strings.
     $includeGlobs = @(foreach ($g in $Include) { foreach ($part in ([string]$g).Split(',')) { if ($part.Trim()) { $part.Trim() } } })
     $excludeGlobs = @(foreach ($g in $Exclude) { foreach ($part in ([string]$g).Split(',')) { if ($part.Trim()) { $part.Trim() } } })
@@ -2390,7 +2405,7 @@ function Invoke-Main {
             }
             if ($fmt -eq 'text') {
                 $suffix = '  (IIN filtered)'
-                if ($NoIin) { $suffix = '' }
+                if ($NoIIN) { $suffix = '' }
                 Write-Output "Attempting to generate up to $est PAN combinations for: $clean$suffix"
             }
             $total = 0
